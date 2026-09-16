@@ -34,7 +34,7 @@ export function SiteHeader() {
           <Wordmark />
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-5 lg:flex" aria-label="Main navigation">
           {navItems.map((item) => (
             <Link
               key={item.to}
@@ -46,6 +46,16 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          <Link
+            to="/sign-in"
+            className="text-base font-semibold text-foreground/75 transition-colors hover:text-primary"
+            activeProps={{ className: "text-primary" }}
+          >
+            Sign in
+          </Link>
+          <Button asChild variant="outline" size="default" className="h-11 px-5">
+            <Link to="/create-account">Create account</Link>
+          </Button>
           <Button asChild size="lg">
             <Link to="/contact" search={{ about: undefined }}>Contact us</Link>
           </Button>
@@ -84,6 +94,22 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              to="/sign-in"
+              className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
+              activeProps={{ className: "bg-secondary text-primary" }}
+              onClick={() => setOpen(false)}
+            >
+              Sign in
+            </Link>
+            <Link
+              to="/create-account"
+              className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
+              activeProps={{ className: "bg-secondary text-primary" }}
+              onClick={() => setOpen(false)}
+            >
+              Create account
+            </Link>
             <Button asChild size="lg" className="mt-3 w-full">
               <Link to="/contact" search={{ about: undefined }} onClick={() => setOpen(false)}>
                 Contact us

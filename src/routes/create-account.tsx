@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
 import { PageIntro } from "@/components/gracefield";
 
 export const Route = createFileRoute("/create-account")({
@@ -34,7 +35,13 @@ function CreateAccountPage() {
         <div className="mx-auto max-w-xl">
           <div className="surface-card rounded-2xl p-6 sm:p-9">
             <h2 className="font-heading text-2xl font-extrabold text-primary sm:text-3xl">Create account</h2>
-            <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+            <div className="mt-7">
+              <GoogleContinueButton />
+            </div>
+            <div className="my-6">
+              <AuthOrDivider />
+            </div>
+            <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
                 <Label htmlFor="signup-email" className="text-base font-bold">Email address</Label>
                 <Input id="signup-email" name="signup-email" type="email" required autoComplete="email" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" />
