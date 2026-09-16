@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import careKitchen from "@/assets/gracefield-care-kitchen.jpg";
+import { uploadPublicPhoto } from "@/lib/auth";
+import { authErrorMessage, getSupabase } from "@/lib/supabase";
 
 const CAREERS_WHATSAPP_DISPLAY = "+44 7000 000000";
 const CAREERS_WHATSAPP_LINK = "https://wa.me/447000000000";
@@ -34,18 +36,42 @@ function CareersPage() {
   const [submitted, setSubmitted] = useState(false);
   const [photoName, setPhotoName] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoFile(file);
     setPhotoName(file ? file.name : null);
     setPhotoPreview(file ? URL.createObjectURL(file) : null);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!photoName) return;
-    setSubmitted(true);
+    if (!photoFile) return;
+    const form = new FormData(event.currentTarget);
+    setBusy(true);
+    setError(null);
+    try {
+      const photoUrl = await uploadPublicPhoto("applications", photoFile);
+      const { error: insertError } = await getSupabase().from("applications").insert({
+        full_name: String(form.get("applicant-name") ?? ""),
+        email: String(form.get("applicant-email") ?? ""),
+        phone: String(form.get("applicant-phone") ?? ""),
+        years_experience: String(form.get("applicant-experience") ?? ""),
+        availability: String(form.get("applicant-availability") ?? ""),
+        about: String(form.get("applicant-about") ?? ""),
+        photo_url: photoUrl,
+        status: "pending",
+      });
+      if (insertError) throw insertError;
+      setSubmitted(true);
+    } catch (caught) {
+      setError(authErrorMessage(caught, "We could not send that application. Please try again."));
+      setBusy(false);
+    }
   };
 
   return (
@@ -149,7 +175,10 @@ function CareersPage() {
                         ) : null}
                       </div>
                     </div>
-                    <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={!photoName}>Submit application</Button>
+                    {error ? <p role="alert" className="text-base font-bold text-destructive">{error}</p> : null}
+                    <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={!photoName || busy}>
+                      {busy ? "Sending…" : "Submit application"}
+                    </Button>
                     {!photoName ? <p className="text-sm text-muted-foreground">Add your photo to finish your application.</p> : null}
                   </form>
                 </>

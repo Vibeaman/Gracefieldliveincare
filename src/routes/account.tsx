@@ -1,8 +1,19 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ClipboardList, UserRound } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
+import { ensureClientProfile, getUser, signOut } from "@/lib/auth";
+import {
+  BOOKING_STATUS_LABELS,
+  formatDate,
+  type BookingWithCarer,
+  type Client,
+} from "@/lib/database.types";
+import { authErrorMessage, getSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/account")({
   head: () => ({ meta: [
@@ -17,32 +28,159 @@ export const Route = createFileRoute("/account")({
 });
 
 function AccountPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [client, setClient] = useState<Client | null>(null);
+  const [bookings, setBookings] = useState<BookingWithCarer[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async () => {
+    const user = await getUser();
+    if (!user) {
+      await navigate({ to: "/sign-in" });
+      return;
+    }
+    await ensureClientProfile();
+    const supabase = getSupabase();
+    setEmail(user.email ?? "");
+
+    const { data: clientRow, error: clientError } = await supabase
+      .from("clients")
+      .select("id, full_name, phone, address, created_at")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (clientError) {
+      setError(clientError.message);
+      setLoading(false);
+      return;
+    }
+    setClient(clientRow);
+
+    const { data: bookingRows, error: bookingError } = await supabase
+      .from("bookings")
+      .select(
+        "id, client_id, care_type, location, start_date, hours, status, assigned_carer_id, created_at, carers ( id, name, photo_url ), reviews ( id, rating, comment )",
+      )
+      .eq("client_id", user.id)
+      .order("created_at", { ascending: false });
+    if (bookingError) {
+      setError(bookingError.message);
+      setLoading(false);
+      return;
+    }
+
+    setBookings(
+      (bookingRows ?? []).map((row) => {
+        const carerRel = Array.isArray(row.carers) ? row.carers[0] : row.carers;
+        const reviewRel = Array.isArray(row.reviews) ? row.reviews[0] : row.reviews;
+        return {
+          id: row.id,
+          client_id: row.client_id,
+          care_type: row.care_type,
+          location: row.location,
+          start_date: row.start_date,
+          hours: row.hours,
+          status: row.status,
+          assigned_carer_id: row.assigned_carer_id,
+          created_at: row.created_at,
+          carer: carerRel ?? null,
+          review: reviewRel ?? null,
+        };
+      }),
+    );
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  if (loading) {
+    return <div className="min-h-[40vh] bg-background" />;
+  }
+
   return (
     <>
       <PageIntro eyebrow="Your account" title="Your Gracefield account.">
-        <p>This is where your care request and details will live. It is ready and waiting for your information.</p>
+        <p>This is where your care request and details live.</p>
       </PageIntro>
       <section className="section-band px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
         <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
           <article className="surface-card rounded-2xl p-7 sm:p-8">
             <ClipboardList className="h-8 w-8 text-brand-gold" aria-hidden="true" />
             <h2 className="mt-6 font-heading text-2xl font-extrabold text-primary">Care request status</h2>
-            <p className="mt-2 text-base text-muted-foreground">You have not started a care request yet. Once you do, its progress will show here.</p>
-            <span className="mt-5 inline-flex rounded-full border border-primary/25 bg-secondary px-4 py-1.5 text-sm font-bold text-primary">No request yet</span>
+            {bookings.length === 0 ? (
+              <>
+                <p className="mt-2 text-base text-muted-foreground">You have not started a care request yet.</p>
+                <span className="mt-5 inline-flex rounded-full border border-primary/25 bg-secondary px-4 py-1.5 text-sm font-bold text-primary">No request yet</span>
+                <Button asChild size="lg" className="mt-6 w-full sm:w-auto">
+                  <Link to="/request-care">Request care</Link>
+                </Button>
+              </>
+            ) : (
+              <ul className="mt-5 space-y-5">
+                {bookings.map((booking) => (
+                  <li key={booking.id} className="border-t border-border pt-5 first:border-t-0 first:pt-0">
+                    <p className="font-bold text-primary">{booking.care_type}</p>
+                    <p className="mt-1 text-base text-muted-foreground">
+                      {booking.location} · from {formatDate(booking.start_date)}
+                    </p>
+                    <p className="mt-1 text-base text-muted-foreground">{booking.hours}</p>
+                    <span className="mt-3 inline-flex rounded-full border border-primary/25 bg-secondary px-4 py-1.5 text-sm font-bold text-primary">
+                      {BOOKING_STATUS_LABELS[booking.status]}
+                    </span>
+                    {booking.carer ? (
+                      <p className="mt-3 text-base text-muted-foreground">
+                        Carer: <span className="font-bold text-primary">{booking.carer.name}</span>
+                      </p>
+                    ) : null}
+                    {booking.status === "completed" ? (
+                      booking.review ? (
+                        <p className="mt-3 text-base text-muted-foreground">
+                          Your review: {booking.review.rating} out of 5
+                        </p>
+                      ) : (
+                        <LeaveReview booking={booking} onSaved={() => void load()} />
+                      )
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
           </article>
           <article className="surface-card rounded-2xl p-7 sm:p-8">
             <UserRound className="h-8 w-8 text-brand-gold" aria-hidden="true" />
             <h2 className="mt-6 font-heading text-2xl font-extrabold text-primary">Your details</h2>
             <dl className="mt-5 space-y-4 text-base">
-              {[["Name", "Not added yet"], ["Email address", "Not added yet"], ["Phone number", "Not added yet"]].map(([label, value]) => (
+              {[
+                ["Name", client?.full_name || "Not added yet"],
+                ["Email address", email || "Not added yet"],
+                ["Phone number", client?.phone || "Not added yet"],
+              ].map(([label, value]) => (
                 <div key={label}>
                   <dt className="font-bold text-primary">{label}</dt>
                   <dd className="text-muted-foreground">{value}</dd>
                 </div>
               ))}
             </dl>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="mt-8 w-full sm:w-auto"
+              onClick={async () => {
+                await signOut();
+                await navigate({ to: "/" });
+              }}
+            >
+              Sign out
+            </Button>
           </article>
         </div>
+        {error ? (
+          <p role="alert" className="mx-auto mt-8 max-w-5xl text-base font-bold text-destructive">{error}</p>
+        ) : null}
         <div className="mx-auto mt-12 max-w-5xl">
           <Eyebrow>Next step</Eyebrow>
           <p className="max-w-2xl text-lg text-muted-foreground">Have a question in the meantime? Our team is happy to talk things through.</p>
@@ -50,5 +188,76 @@ function AccountPage() {
         </div>
       </section>
     </>
+  );
+}
+
+function LeaveReview({
+  booking,
+  onSaved,
+}: {
+  booking: BookingWithCarer;
+  onSaved: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!booking.assigned_carer_id) return;
+    const form = new FormData(event.currentTarget);
+    const rating = Number(form.get("rating"));
+    const comment = String(form.get("comment") ?? "");
+    setBusy(true);
+    setError(null);
+    const { error: insertError } = await getSupabase().from("reviews").insert({
+      booking_id: booking.id,
+      carer_id: booking.assigned_carer_id,
+      rating,
+      comment,
+    });
+    if (insertError) {
+      setError(authErrorMessage(insertError, "We could not save that review."));
+      setBusy(false);
+      return;
+    }
+    onSaved();
+  };
+
+  if (!open) {
+    return (
+      <Button type="button" size="lg" className="mt-4 w-full sm:w-auto" onClick={() => setOpen(true)}>
+        Leave a review
+      </Button>
+    );
+  }
+
+  return (
+    <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+      <div>
+        <Label htmlFor={`rating-${booking.id}`} className="text-base font-bold">Rating</Label>
+        <select
+          id={`rating-${booking.id}`}
+          name="rating"
+          required
+          defaultValue="5"
+          className="mt-2 h-13 w-full rounded-xl border border-input bg-background px-4 text-base"
+        >
+          <option value="5">5 — Excellent</option>
+          <option value="4">4 — Good</option>
+          <option value="3">3 — Okay</option>
+          <option value="2">2 — Not great</option>
+          <option value="1">1 — Poor</option>
+        </select>
+      </div>
+      <div>
+        <Label htmlFor={`comment-${booking.id}`} className="text-base font-bold">Your comments</Label>
+        <Textarea id={`comment-${booking.id}`} name="comment" rows={4} className="mt-2 min-h-28 rounded-xl bg-background px-4 py-3 text-base" />
+      </div>
+      {error ? <p role="alert" className="text-base font-bold text-destructive">{error}</p> : null}
+      <Button type="submit" size="lg" className="w-full" disabled={busy}>
+        {busy ? "Saving…" : "Save review"}
+      </Button>
+    </form>
   );
 }

@@ -5,26 +5,19 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/gracefield";
 import { FieldLabel, fieldClasses } from "@/components/admin";
+import { getAdminPasscode, isAdminUnlocked, lockAdmin, unlockAdmin } from "@/lib/admin-session";
+import { listAdminBookings } from "@/lib/admin.functions";
 
 /**
  * TEMPORARY GATE — NOT REAL SECURITY.
  *
- * This only hides the screens behind a shared passcode held in the browser. The
- * page and this passcode are both shipped to the visitor, so treat it as a
- * "keep out" sign, not a lock. Replace it with Supabase role-based auth before
- * any real client information goes through these screens.
- *
- * Set VITE_ADMIN_PASSCODE in the environment (Vercel project settings) to change
- * the passcode without touching the code.
+ * The passcode is checked again on the server for every admin write. The screen
+ * itself is still only a keep-out sign. Swap for Supabase role-based auth later.
  */
-const ADMIN_PASSCODE = import.meta.env["VITE_ADMIN_PASSCODE"] ?? "gracefield";
-const UNLOCK_KEY = "gracefield-admin-unlocked";
-
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Gracefield admin" },
-      // Keep the admin screens out of search results.
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -32,22 +25,21 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  // Starts locked on the server and on first paint, then checks the browser.
   const [unlocked, setUnlocked] = useState(false);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    setUnlocked(window.sessionStorage.getItem(UNLOCK_KEY) === "yes");
+    setUnlocked(isAdminUnlocked());
     setChecked(true);
   }, []);
 
-  const handleUnlock = () => {
-    window.sessionStorage.setItem(UNLOCK_KEY, "yes");
+  const handleUnlock = (passcode: string) => {
+    unlockAdmin(passcode);
     setUnlocked(true);
   };
 
   const handleLock = () => {
-    window.sessionStorage.removeItem(UNLOCK_KEY);
+    lockAdmin();
     setUnlocked(false);
   };
 
@@ -99,18 +91,22 @@ function AdminHeader({ onLock }: { onLock: () => void }) {
   );
 }
 
-function PasscodeScreen({ onUnlock }: { onUnlock: () => void }) {
+function PasscodeScreen({ onUnlock }: { onUnlock: (passcode: string) => void }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (value.trim() === ADMIN_PASSCODE) {
-      setError(false);
-      onUnlock();
-      return;
+    setBusy(true);
+    setError(false);
+    try {
+      await listAdminBookings({ data: { passcode: value.trim() } });
+      onUnlock(value.trim());
+    } catch {
+      setError(true);
+      setBusy(false);
     }
-    setError(true);
   };
 
   return (
@@ -142,8 +138,8 @@ function PasscodeScreen({ onUnlock }: { onUnlock: () => void }) {
               That password did not work. Please try again.
             </p>
           ) : null}
-          <Button type="submit" size="lg" className="mt-6 h-16 w-full text-lg">
-            Continue
+          <Button type="submit" size="lg" className="mt-6 h-16 w-full text-lg" disabled={busy}>
+            {busy ? "Checking…" : "Continue"}
           </Button>
         </form>
       </div>

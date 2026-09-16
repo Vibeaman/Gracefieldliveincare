@@ -3,7 +3,7 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
-import { initials, type BookingStatus } from "@/lib/admin-data";
+import { initials, type BookingStatus } from "@/lib/database.types";
 
 /** Page heading plus the one-line instruction that sits under it. */
 const backLinkClass =

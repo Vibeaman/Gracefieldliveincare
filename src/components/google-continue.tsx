@@ -1,6 +1,8 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { authErrorMessage } from "@/lib/supabase";
+import { signInWithGoogle } from "@/lib/auth";
 
 function GoogleMark() {
   return (
@@ -25,23 +27,37 @@ function GoogleMark() {
   );
 }
 
-/** Placeholder Google continue — same as email until real Google sign-in is wired. */
 export function GoogleContinueButton() {
-  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="lg"
-      className="w-full border-input bg-background text-foreground hover:bg-secondary hover:text-foreground"
-      onClick={() => {
-        void navigate({ to: "/account" });
-      }}
-    >
-      <GoogleMark />
-      Continue with Google
-    </Button>
+    <div>
+      <Button
+        type="button"
+        variant="outline"
+        size="lg"
+        className="w-full border-input bg-background text-foreground hover:bg-secondary hover:text-foreground"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          setError(null);
+          const { error: authError } = await signInWithGoogle();
+          if (authError) {
+            setError(authErrorMessage(authError, "Google sign-in did not work. Please try again."));
+            setBusy(false);
+          }
+        }}
+      >
+        <GoogleMark />
+        {busy ? "Opening Google…" : "Continue with Google"}
+      </Button>
+      {error ? (
+        <p role="alert" className="mt-3 text-base font-bold text-destructive">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

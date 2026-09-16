@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
 import { PageIntro } from "@/components/gracefield";
+import { ensureClientProfile, signInWithEmail } from "@/lib/auth";
+import { authErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/sign-in")({
   head: () => ({ meta: [
@@ -21,9 +23,24 @@ export const Route = createFileRoute("/sign-in")({
 
 function SignInPage() {
   const navigate = useNavigate();
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    void navigate({ to: "/account" });
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("signin-email") ?? "");
+    const password = String(form.get("signin-password") ?? "");
+    setBusy(true);
+    setError(null);
+    const { error: authError } = await signInWithEmail(email, password);
+    if (authError) {
+      setError(authErrorMessage(authError, "That email or password did not work. Please try again."));
+      setBusy(false);
+      return;
+    }
+    await ensureClientProfile();
+    await navigate({ to: "/account" });
   };
 
   return (
@@ -50,7 +67,12 @@ function SignInPage() {
                 <Label htmlFor="signin-password" className="text-base font-bold">Password</Label>
                 <Input id="signin-password" name="signin-password" type="password" required autoComplete="current-password" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" />
               </div>
-              <Button type="submit" size="lg" className="w-full">Sign in</Button>
+              {error ? (
+                <p role="alert" className="text-base font-bold text-destructive">{error}</p>
+              ) : null}
+              <Button type="submit" size="lg" className="w-full" disabled={busy}>
+                {busy ? "Signing in…" : "Sign in"}
+              </Button>
             </form>
             <p className="mt-6 text-base text-muted-foreground">
               New to Gracefield? <Link to="/create-account" className="font-bold text-primary underline decoration-brand-gold underline-offset-4">Create an account</Link>
