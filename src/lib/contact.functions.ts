@@ -4,7 +4,7 @@ import { z } from "zod";
 const CONTACT_TO =
   process.env["CONTACT_TO_EMAIL"] ?? "gracefieldliveincare@gmail.com";
 const FROM_EMAIL =
-  process.env["RESEND_FROM_EMAIL"] ?? "Gracefield Living in Care <beth.t@example.com>";
+  process.env["RESEND_FROM_EMAIL"] ?? "Gracefield Living in Care <onboarding@resend.dev>";
 
 const SUBJECT_LABELS = {
   care: "Live-in care for a family member",

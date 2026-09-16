@@ -4,7 +4,7 @@ import { getServiceSupabase } from "@/lib/supabase.server";
 const SITE_URL =
   process.env["SITE_URL"] ?? "https://gracefieldliveincare.vercel.app";
 const FROM_EMAIL =
-  process.env["RESEND_FROM_EMAIL"] ?? "Gracefield Living in Care <beth.t@example.com>";
+  process.env["RESEND_FROM_EMAIL"] ?? "Gracefield Living in Care <onboarding@resend.dev>";
 
 type StatusEmail = {
   subject: string;
