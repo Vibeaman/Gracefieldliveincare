@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://gracefieldliveincare.vercel.app/</loc>
+    <loc>https://www.gracefieldliveincare.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://gracefieldliveincare.vercel.app/about</loc>
+    <loc>https://www.gracefieldliveincare.com/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gracefieldliveincare.vercel.app/live-in-care</loc>
+    <loc>https://www.gracefieldliveincare.com/live-in-care</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://gracefieldliveincare.vercel.app/careers</loc>
+    <loc>https://www.gracefieldliveincare.com/careers</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gracefieldliveincare.vercel.app/contact</loc>
+    <loc>https://www.gracefieldliveincare.com/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gracefieldliveincare.vercel.app/request-care</loc>
+    <loc>https://www.gracefieldliveincare.com/request-care</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gracefieldliveincare.vercel.app/privacy</loc>
+    <loc>https://www.gracefieldliveincare.com/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://gracefieldliveincare.vercel.app/terms</loc>
+    <loc>https://www.gracefieldliveincare.com/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

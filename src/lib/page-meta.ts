@@ -1,4 +1,4 @@
-const SITE_URL = "https://gracefieldliveincare.vercel.app";
+const SITE_URL = "https://www.gracefieldliveincare.com";
 
 export function pageMeta(
   title: string,

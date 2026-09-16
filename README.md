@@ -21,9 +21,9 @@ Admin screens: [http://localhost:3000/admin](http://localhost:3000/admin). Defau
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. In **Authentication → Providers**, turn on **Email** and **Google**. For Google you need a Google Cloud OAuth client ID and secret. Add `https://YOUR_PROJECT.supabase.co/auth/v1/callback` as an authorised redirect URI. Under **Authentication → URL configuration → Redirect URLs**, add:
-   - `https://gracefieldliveincare.vercel.app/account`
-   - `https://gracefieldliveincare.vercel.app/reset-password`
-   Password reset emails are sent by Supabase (not Resend). No custom domain is required for that.
+   - `https://www.gracefieldliveincare.com/account`
+   - `https://www.gracefieldliveincare.com/reset-password`
+   Password reset emails are sent by Supabase (not Resend).
 3. Open **SQL Editor**, paste `supabase/schema.sql`, and run it. That creates tables, Row Level Security, the new-user trigger, and a public `photos` storage bucket.
 4. Copy the project URL, anon key, and service role key from **Project Settings → API** into `.env.local` and into Vercel.
 
@@ -40,9 +40,9 @@ The repo is already set up for Vercel (Nitro plugin + `vercel.json` framework pr
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_PASSCODE` (server only — do not use a VITE_ prefix)
    - `RESEND_API_KEY` (for the contact form and emails when a booking status changes)
-   - `RESEND_FROM_EMAIL` (optional; defaults to Resend's test sender)
+   - `RESEND_FROM_EMAIL` (optional; defaults to Resend's test sender until a domain is verified)
    - `CONTACT_TO_EMAIL` (optional; defaults to gracefieldliveincare@gmail.com)
-   - `SITE_URL` (optional; defaults to the live Vercel URL)
+   - `SITE_URL` (optional; defaults to https://www.gracefieldliveincare.com)
 4. Deploy.
 
 After the first deploy, every push to `main` ships a new production build. If you change environment variables later, trigger a new deploy so the build picks them up.

@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "Gracefield Living in Care" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Gracefield Living in Care" },
-      { property: "og:image", content: "https://gracefieldliveincare.vercel.app/apple-touch-icon.png" },
+      { property: "og:image", content: "https://www.gracefieldliveincare.com/apple-touch-icon.png" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [

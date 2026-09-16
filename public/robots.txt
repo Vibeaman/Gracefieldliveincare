@@ -7,5 +7,7 @@ Disallow: /admin/
 Disallow: /account
 Disallow: /sign-in
 Disallow: /create-account
+Disallow: /forgot-password
+Disallow: /reset-password
 
-Sitemap: https://gracefieldliveincare.vercel.app/sitemap.xml
+Sitemap: https://www.gracefieldliveincare.com/sitemap.xml
