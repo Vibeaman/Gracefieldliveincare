@@ -7,18 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageIntro } from "@/components/gracefield";
 import { ensureClientProfile, getClientProfile, getUser, isProfileComplete, saveClientDetails } from "@/lib/auth";
+import { pageMeta } from "@/lib/page-meta";
+import { PAGE_SEO } from "@/lib/seo";
 import { authErrorMessage, getSupabase } from "@/lib/supabase";
 import type { Client } from "@/lib/database.types";
 
 export const Route = createFileRoute("/request-care")({
-  head: () => ({ meta: [
-    { title: "Request Live-in Care | Gracefield" },
-    { name: "description", content: "Sign in or create a Gracefield account to start a live-in care request for your family." },
-    { property: "og:title", content: "Request Live-in Care | Gracefield" },
-    { property: "og:description", content: "Sign in or create a Gracefield account to start a live-in care request for your family." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: pageMeta(PAGE_SEO.requestCare.title, PAGE_SEO.requestCare.description, {
+      path: "/request-care",
+    }),
+  }),
   component: RequestCarePage,
 });
 

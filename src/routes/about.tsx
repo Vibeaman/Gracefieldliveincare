@@ -2,16 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import careMemories from "@/assets/gracefield-care-memories.jpg";
+import { pageMeta } from "@/lib/page-meta";
+import { PAGE_SEO } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({ meta: [
-    { title: "About Gracefield Living in Care" },
-    { name: "description", content: "Learn why Gracefield was founded and the values guiding our live-in home care." },
-    { property: "og:title", content: "About Gracefield Living in Care" },
-    { property: "og:description", content: "Learn why Gracefield was founded and the values guiding our live-in home care." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: pageMeta(PAGE_SEO.about.title, PAGE_SEO.about.description, { path: "/about" }),
+  }),
   component: AboutPage,
 });
 

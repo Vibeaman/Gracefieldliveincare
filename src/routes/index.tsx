@@ -6,17 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/gracefield";
 import careKitchen from "@/assets/gracefield-care-kitchen.jpg";
 import careGarden from "@/assets/gracefield-care-garden.jpg";
+import { pageMeta } from "@/lib/page-meta";
+import { PAGE_SEO } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [
-      { title: "Live-in Home Care | Gracefield" },
-      { name: "description", content: "Dedicated live-in care helping older people stay safely in the home they love." },
-      { property: "og:title", content: "Live-in Home Care | Gracefield" },
-      { property: "og:description", content: "Dedicated live-in care helping older people stay safely in the home they love." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
+    meta: pageMeta(PAGE_SEO.home.title, PAGE_SEO.home.description, { path: "/" }),
   }),
   component: Index,
 });

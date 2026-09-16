@@ -7,17 +7,14 @@ import { Label } from "@/components/ui/label";
 import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
 import { PageIntro } from "@/components/gracefield";
 import { ensureClientProfile, signInWithEmail } from "@/lib/auth";
+import { pageMeta } from "@/lib/page-meta";
+import { PAGE_SEO } from "@/lib/seo";
 import { authErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/sign-in")({
-  head: () => ({ meta: [
-    { title: "Sign In | Gracefield Living in Care" },
-    { name: "description", content: "Sign in to your Gracefield account to continue your live-in care request." },
-    { property: "og:title", content: "Sign In | Gracefield Living in Care" },
-    { property: "og:description", content: "Sign in to your Gracefield account to continue your live-in care request." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: pageMeta(PAGE_SEO.signIn.title, PAGE_SEO.signIn.description, { path: "/sign-in" }),
+  }),
   component: SignInPage,
 });
 

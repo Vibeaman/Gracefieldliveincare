@@ -11,6 +11,7 @@ import {
 import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { CookieBanner } from "../components/cookie-banner";
 import { SiteFooter, SiteHeader } from "../components/gracefield";
 
 function NotFoundComponent() {
@@ -75,10 +76,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Gracefield Living in Care" },
-      { name: "description", content: "Thoughtful live-in care in the comfort of home." },
+      { title: "Live-in Home Care in Cumbria | Gracefield Living in Care" },
+      {
+        name: "description",
+        content:
+          "Dedicated live-in care helping older people stay safely in the home they love, with a carefully chosen carer by their side.",
+      },
       { name: "author", content: "Gracefield Living in Care" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Gracefield Living in Care" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -139,6 +145,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <SiteFooter />
+        <CookieBanner />
       </div>
     </QueryClientProvider>
   );

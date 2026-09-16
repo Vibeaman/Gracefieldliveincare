@@ -35,8 +35,7 @@ The repo is already set up for Vercel (Nitro plugin + `vercel.json` framework pr
    - `VITE_SUPABASE_ANON_KEY`
    - `SUPABASE_URL` (same value as `VITE_SUPABASE_URL`)
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - `ADMIN_PASSCODE`
-   - `VITE_ADMIN_PASSCODE` (same value as `ADMIN_PASSCODE`)
+   - `ADMIN_PASSCODE` (server only — do not use a VITE_ prefix)
    - `RESEND_API_KEY` (for emails when a booking status changes)
    - `RESEND_FROM_EMAIL` (optional; defaults to Resend's test sender)
    - `SITE_URL` (optional; defaults to the live Vercel URL)

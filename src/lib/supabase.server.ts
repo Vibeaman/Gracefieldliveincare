@@ -28,7 +28,7 @@ export function getServiceSupabase(): SupabaseClient {
 }
 
 export function requireAdminPasscode(passcode: string): void {
-  const expected = process.env["ADMIN_PASSCODE"] ?? process.env["VITE_ADMIN_PASSCODE"];
+  const expected = process.env["ADMIN_PASSCODE"];
   if (!expected) {
     throw new Error("Admin passcode is not configured on the server.");
   }

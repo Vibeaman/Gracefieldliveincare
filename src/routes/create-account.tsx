@@ -7,17 +7,16 @@ import { Label } from "@/components/ui/label";
 import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
 import { PageIntro } from "@/components/gracefield";
 import { ensureClientProfile, signUpWithEmail } from "@/lib/auth";
+import { pageMeta } from "@/lib/page-meta";
+import { PAGE_SEO } from "@/lib/seo";
 import { authErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/create-account")({
-  head: () => ({ meta: [
-    { title: "Create an Account | Gracefield Living in Care" },
-    { name: "description", content: "Create a Gracefield account to start a live-in care request for your loved one." },
-    { property: "og:title", content: "Create an Account | Gracefield Living in Care" },
-    { property: "og:description", content: "Create a Gracefield account to start a live-in care request for your loved one." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: pageMeta(PAGE_SEO.createAccount.title, PAGE_SEO.createAccount.description, {
+      path: "/create-account",
+    }),
+  }),
   component: CreateAccountPage,
 });
 

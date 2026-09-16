@@ -179,10 +179,18 @@ export function SiteFooter() {
               <Link to="/contact" search={{ about: undefined }} className="text-foreground/75 hover:text-primary">
                 Contact
               </Link>
+              <Link to="/privacy" className="text-foreground/75 hover:text-primary">
+                Privacy
+              </Link>
+              <Link to="/terms" className="text-foreground/75 hover:text-primary">
+                Terms
+              </Link>
             </nav>
           </div>
         </div>
-        <p className="mt-10 border-t border-border pt-6 text-sm text-muted-foreground">© {new Date().getFullYear()} Gracefield Living in Care. All rights reserved.</p>
+        <p className="mt-10 border-t border-border pt-6 text-sm text-muted-foreground">
+          © {new Date().getFullYear()} Gracefield Living in Care. All rights reserved.
+        </p>
       </div>
     </footer>
   );

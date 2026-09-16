@@ -4,16 +4,13 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import careGarden from "@/assets/gracefield-care-garden.jpg";
+import { pageMeta } from "@/lib/page-meta";
+import { PAGE_SEO } from "@/lib/seo";
 
 export const Route = createFileRoute("/live-in-care")({
-  head: () => ({ meta: [
-    { title: "Live-in Care Services | Gracefield" },
-    { name: "description", content: "Discover dedicated live-in support for personal care, medication, daily life and companionship." },
-    { property: "og:title", content: "Live-in Care Services | Gracefield" },
-    { property: "og:description", content: "Discover dedicated live-in support for personal care, medication, daily life and companionship." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: pageMeta(PAGE_SEO.liveInCare.title, PAGE_SEO.liveInCare.description, { path: "/live-in-care" }),
+  }),
   component: LiveInCarePage,
 });
 

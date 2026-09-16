@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { PersonAvatar } from "@/components/admin";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import { ensureClientProfile, getUser, isProfileComplete, saveClientDetails, signOut } from "@/lib/auth";
+import { pageMeta } from "@/lib/page-meta";
+import { PAGE_SEO } from "@/lib/seo";
 import {
   BOOKING_STATUS_LABELS,
   formatDate,
@@ -18,14 +20,12 @@ import {
 import { authErrorMessage, getSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/account")({
-  head: () => ({ meta: [
-    { title: "Your Account | Gracefield Living in Care" },
-    { name: "description", content: "Your Gracefield account area for your care request status and personal details." },
-    { property: "og:title", content: "Your Account | Gracefield Living in Care" },
-    { property: "og:description", content: "Your Gracefield account area for your care request status and personal details." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: pageMeta(PAGE_SEO.account.title, PAGE_SEO.account.description, {
+      path: "/account",
+      noIndex: true,
+    }),
+  }),
   component: AccountPage,
 });
 

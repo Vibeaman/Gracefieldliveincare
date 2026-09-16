@@ -7,17 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
+import { pageMeta } from "@/lib/page-meta";
+import { PAGE_SEO } from "@/lib/seo";
 
 export const Route = createFileRoute("/contact")({
   validateSearch: (search: Record<string, unknown>) => ({ about: search["about"] === "careers" ? "careers" : undefined }),
-  head: () => ({ meta: [
-    { title: "Contact Gracefield Living in Care" },
-    { name: "description", content: "Talk to Gracefield about live-in care, referrals or becoming a live-in carer." },
-    { property: "og:title", content: "Contact Gracefield Living in Care" },
-    { property: "og:description", content: "Talk to Gracefield about live-in care, referrals or becoming a live-in carer." },
-    { property: "og:type", content: "website" },
-    { name: "twitter:card", content: "summary_large_image" },
-  ] }),
+  head: () => ({
+    meta: pageMeta(PAGE_SEO.contact.title, PAGE_SEO.contact.description, { path: "/contact" }),
+  }),
   component: ContactPage,
 });
 
