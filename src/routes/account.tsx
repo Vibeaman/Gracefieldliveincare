@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PersonAvatar } from "@/components/admin";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import { ensureClientProfile, getUser, isProfileComplete, saveClientDetails, signOut } from "@/lib/auth";
 import {
@@ -61,7 +62,7 @@ function AccountPage() {
     const { data: bookingRows, error: bookingError } = await supabase
       .from("bookings")
       .select(
-        "id, client_id, care_type, location, start_date, hours, status, assigned_carer_id, created_at, carers ( id, name, photo_url ), reviews ( id, rating, comment )",
+        "id, client_id, care_type, location, start_date, hours, status, assigned_carer_id, created_at, carers ( id, name, photo_url, bio ), reviews ( id, rating, comment )",
       )
       .eq("client_id", user.id)
       .order("created_at", { ascending: false });
@@ -144,10 +145,24 @@ function AccountPage() {
                     <span className="mt-3 inline-flex rounded-full border border-primary/25 bg-secondary px-4 py-1.5 text-sm font-bold text-primary">
                       {BOOKING_STATUS_LABELS[booking.status]}
                     </span>
-                    {booking.carer ? (
-                      <p className="mt-3 text-base text-muted-foreground">
-                        Carer: <span className="font-bold text-primary">{booking.carer.name}</span>
-                      </p>
+                    {booking.status !== "pending" && booking.carer ? (
+                      <div className="mt-4 flex gap-4 rounded-2xl border border-border bg-secondary/40 p-4">
+                        <PersonAvatar
+                          fullName={booking.carer.name}
+                          photoUrl={booking.carer.photo_url}
+                        />
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-muted-foreground">Your carer</p>
+                          <p className="font-heading text-lg font-extrabold text-primary">
+                            {booking.carer.name}
+                          </p>
+                          {booking.carer.bio ? (
+                            <p className="mt-1 text-base leading-relaxed text-muted-foreground">
+                              {booking.carer.bio}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
                     ) : null}
                     {booking.status === "completed" ? (
                       booking.review ? (

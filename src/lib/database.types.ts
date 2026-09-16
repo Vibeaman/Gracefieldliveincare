@@ -53,7 +53,7 @@ export type Review = {
 };
 
 export type BookingWithCarer = Booking & {
-  carer: Pick<Carer, "id" | "name" | "photo_url"> | null;
+  carer: Pick<Carer, "id" | "name" | "photo_url" | "bio"> | null;
   review: Pick<Review, "id" | "rating" | "comment"> | null;
 };
 

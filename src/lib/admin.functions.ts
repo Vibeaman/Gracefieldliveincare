@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { sendBookingStatusEmail } from "@/lib/booking-emails";
 import { getServiceSupabase, requireAdminPasscode } from "@/lib/supabase.server";
-import type { AdminBooking, Application, Carer } from "@/lib/database.types";
+import type { AdminBooking, Application, BookingStatus, Carer } from "@/lib/database.types";
 
 const passcodeSchema = z.object({
   passcode: z.string().min(1),
@@ -51,6 +52,13 @@ export const updateAdminBooking = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     requireAdminPasscode(data.passcode);
     const supabase = getServiceSupabase();
+    const { data: current, error: loadError } = await supabase
+      .from("bookings")
+      .select("id, client_id, status")
+      .eq("id", data.id)
+      .single();
+    if (loadError) throw new Error(loadError.message);
+
     const { error } = await supabase
       .from("bookings")
       .update({
@@ -59,6 +67,20 @@ export const updateAdminBooking = createServerFn({ method: "POST" })
       })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+
+    const previousStatus = current.status as BookingStatus;
+    if (previousStatus !== data.status) {
+      try {
+        await sendBookingStatusEmail({
+          clientId: current.client_id,
+          status: data.status,
+          previousStatus,
+        });
+      } catch (emailError) {
+        console.error("Booking status email failed:", emailError);
+      }
+    }
+
     return { ok: true as const };
   });
 

@@ -37,6 +37,9 @@ The repo is already set up for Vercel (Nitro plugin + `vercel.json` framework pr
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_PASSCODE`
    - `VITE_ADMIN_PASSCODE` (same value as `ADMIN_PASSCODE`)
+   - `RESEND_API_KEY` (for emails when a booking status changes)
+   - `RESEND_FROM_EMAIL` (optional; defaults to Resend's test sender)
+   - `SITE_URL` (optional; defaults to the live Vercel URL)
 4. Deploy.
 
 After the first deploy, every push to `main` ships a new production build. If you change environment variables later, trigger a new deploy so the build picks them up.
