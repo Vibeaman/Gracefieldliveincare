@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { getServiceSupabase } from "@/lib/supabase.server";
+
 const CONTACT_TO =
   process.env["CONTACT_TO_EMAIL"] ?? "gracefieldliveincare@gmail.com";
 const FROM_EMAIL =
@@ -33,9 +35,22 @@ export const sendContactMessage = createServerFn({ method: "POST" })
       return { ok: true as const };
     }
 
+    const supabase = getServiceSupabase();
+    const { error: saveError } = await supabase.from("enquiries").insert({
+      full_name: data.fullName,
+      email: data.email,
+      phone: data.phone,
+      subject: data.subject,
+      message: data.message,
+    });
+    if (saveError) {
+      console.error("Contact enquiry save failed:", saveError.message);
+      throw new Error("We could not send that message. Please email gracefieldliveincare@gmail.com or call us.");
+    }
+
     const apiKey = process.env["RESEND_API_KEY"];
     if (!apiKey) {
-      throw new Error("Message sending is not set up yet. Please email gracefieldliveincare@gmail.com.");
+      return { ok: true as const };
     }
 
     const topic = SUBJECT_LABELS[data.subject];
@@ -69,7 +84,6 @@ export const sendContactMessage = createServerFn({ method: "POST" })
     if (!response.ok) {
       const body = await response.text();
       console.error("Contact email failed:", response.status, body);
-      throw new Error("We could not send that message. Please email gracefieldliveincare@gmail.com or call us.");
     }
 
     return { ok: true as const };

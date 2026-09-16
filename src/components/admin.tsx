@@ -19,7 +19,7 @@ export function AdminScreen({
   instruction: string;
   back?: {
     label: string;
-    to?: "/admin" | "/admin/bookings" | "/admin/carers" | "/admin/applications";
+    to?: "/admin" | "/admin/bookings" | "/admin/carers" | "/admin/applications" | "/admin/enquiries";
     onClick?: () => void;
   };
   children: ReactNode;
@@ -58,7 +58,7 @@ export function BigActionCard({
   description,
   icon: Icon,
 }: {
-  to: "/admin/bookings" | "/admin/carers" | "/admin/applications";
+  to: "/admin/bookings" | "/admin/carers" | "/admin/applications" | "/admin/enquiries";
   title: string;
   description: string;
   icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;

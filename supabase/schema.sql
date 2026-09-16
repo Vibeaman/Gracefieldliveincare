@@ -60,6 +60,17 @@ create table if not exists public.reviews (
   unique (booking_id)
 );
 
+create table if not exists public.enquiries (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  email text not null,
+  phone text not null default '',
+  subject text not null
+    check (subject in ('care', 'referral', 'careers')),
+  message text not null,
+  created_at timestamptz not null default now()
+);
+
 -- ---------------------------------------------------------------------------
 -- New-user trigger: every auth user gets a clients row
 -- ---------------------------------------------------------------------------
@@ -99,6 +110,7 @@ alter table public.carers enable row level security;
 alter table public.applications enable row level security;
 alter table public.bookings enable row level security;
 alter table public.reviews enable row level security;
+alter table public.enquiries enable row level security;
 
 -- clients: a person can only see and update their own row
 drop policy if exists "clients_select_own" on public.clients;
@@ -179,6 +191,8 @@ create policy "applications_public_insert"
   on public.applications for insert
   to anon, authenticated
   with check (status = 'pending');
+
+-- enquiries: writes go through the service role. No public policies.
 
 -- ---------------------------------------------------------------------------
 -- Storage: public-read photos. Applications can upload; carer photos go

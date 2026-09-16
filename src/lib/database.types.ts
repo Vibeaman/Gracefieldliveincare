@@ -1,5 +1,6 @@
 export type BookingStatus = "pending" | "assigned" | "active" | "completed";
 export type ApplicationStatus = "pending" | "accepted" | "declined";
+export type EnquirySubject = "care" | "referral" | "careers";
 
 export type Client = {
   id: string;
@@ -52,6 +53,16 @@ export type Review = {
   created_at: string;
 };
 
+export type Enquiry = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  subject: EnquirySubject;
+  message: string;
+  created_at: string;
+};
+
 export type BookingWithCarer = Booking & {
   carer: Pick<Carer, "id" | "name" | "photo_url" | "bio"> | null;
   review: Pick<Review, "id" | "rating" | "comment"> | null;
@@ -80,6 +91,12 @@ export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
   pending: "Waiting",
   accepted: "Accepted",
   declined: "Not right now",
+};
+
+export const ENQUIRY_SUBJECT_LABELS: Record<EnquirySubject, string> = {
+  care: "Live-in care for a family member",
+  referral: "Referral",
+  careers: "Careers / becoming a carer",
 };
 
 export function initials(fullName: string): string {

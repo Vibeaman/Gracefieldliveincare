@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { sendBookingStatusEmail } from "@/lib/booking-emails";
 import { getServiceSupabase, requireAdminPasscode } from "@/lib/supabase.server";
-import type { AdminBooking, Application, BookingStatus, Carer } from "@/lib/database.types";
+import type { AdminBooking, Application, BookingStatus, Carer, Enquiry } from "@/lib/database.types";
 
 const passcodeSchema = z.object({
   passcode: z.string().min(1),
@@ -135,6 +135,19 @@ export const deleteAdminCarer = createServerFn({ method: "POST" })
     const { error } = await supabase.from("carers").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
+  });
+
+export const listAdminEnquiries = createServerFn({ method: "POST" })
+  .validator(passcodeSchema)
+  .handler(async ({ data }): Promise<Enquiry[]> => {
+    requireAdminPasscode(data.passcode);
+    const supabase = getServiceSupabase();
+    const { data: rows, error } = await supabase
+      .from("enquiries")
+      .select("id, full_name, email, phone, subject, message, created_at")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
   });
 
 export const listAdminApplications = createServerFn({ method: "POST" })

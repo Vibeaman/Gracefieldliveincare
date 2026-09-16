@@ -24,7 +24,7 @@ Admin screens: [http://localhost:3000/admin](http://localhost:3000/admin). Defau
    - `https://www.gracefieldliveincare.com/account`
    - `https://www.gracefieldliveincare.com/reset-password`
    Password reset emails are sent by Supabase (not Resend).
-3. Open **SQL Editor**, paste `supabase/schema.sql`, and run it. That creates tables, Row Level Security, the new-user trigger, and a public `photos` storage bucket.
+3. Open **SQL Editor**, paste `supabase/schema.sql`, and run it. That creates tables, Row Level Security, the new-user trigger, and a public `photos` storage bucket. If the rest of the schema is already live, run `supabase/enquiries.sql` once so contact-form messages are stored.
 4. Copy the project URL, anon key, and service role key from **Project Settings → API** into `.env.local` and into Vercel.
 
 ## Deploy to Vercel
@@ -55,6 +55,7 @@ Live paths:
 - Care request (after sign in): `/request-care`
 - Client account: `/account`
 - Admin: `/admin` (not linked from the public nav)
+- Admin enquiries: `/admin/enquiries`
 
 The admin passcode is checked on the server for every admin write. It is still a keep-out sign for the page itself, not a full role system.
 

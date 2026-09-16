@@ -65,10 +65,10 @@ function CreateAccountPage() {
             {needsConfirm ? (
               <div role="status">
                 <h2 className="font-heading text-2xl font-extrabold text-primary sm:text-3xl">
-                  Check your email.
+                  You can sign in now.
                 </h2>
                 <p className="mt-3 text-base text-muted-foreground">
-                  We sent a confirmation link. Tap it, then come back here to sign in.
+                  Your account is ready. Sign in with the email and password you just used.
                 </p>
                 <Button asChild size="lg" className="mt-7 w-full">
                   <Link to="/sign-in">Go to sign in</Link>
