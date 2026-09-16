@@ -36,8 +36,9 @@ The repo is already set up for Vercel (Nitro plugin + `vercel.json` framework pr
    - `SUPABASE_URL` (same value as `VITE_SUPABASE_URL`)
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_PASSCODE` (server only — do not use a VITE_ prefix)
-   - `RESEND_API_KEY` (for emails when a booking status changes)
+   - `RESEND_API_KEY` (for the contact form and emails when a booking status changes)
    - `RESEND_FROM_EMAIL` (optional; defaults to Resend's test sender)
+   - `CONTACT_TO_EMAIL` (optional; defaults to gracefieldliveincare@gmail.com)
    - `SITE_URL` (optional; defaults to the live Vercel URL)
 4. Deploy.
 

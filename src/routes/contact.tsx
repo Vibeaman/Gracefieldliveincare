@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { HoneypotFields } from "@/components/honeypot-fields";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
+import { sendContactMessage } from "@/lib/contact.functions";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
 import { isLikelySpam } from "@/lib/spam-guard";
+import { authErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/contact")({
   validateSearch: (search: Record<string, unknown>) => ({ about: search["about"] === "careers" ? "careers" : undefined }),
@@ -22,16 +24,47 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { about } = Route.useSearch();
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    // Bots still see a thank-you. People are not told if they were blocked.
     if (isLikelySpam(form)) {
       setSent(true);
       return;
     }
-    setSent(true);
+
+    const subjectValue = String(form.get("subject") ?? "care");
+    const subject =
+      subjectValue === "referral" || subjectValue === "careers" ? subjectValue : "care";
+
+    setBusy(true);
+    setError(null);
+    try {
+      await sendContactMessage({
+        data: {
+          fullName: String(form.get("full-name") ?? ""),
+          email: String(form.get("email") ?? ""),
+          phone: String(form.get("phone") ?? ""),
+          subject,
+          message: String(form.get("message") ?? ""),
+          company: String(form.get("company") ?? ""),
+          formStarted: String(form.get("form-started") ?? ""),
+        },
+      });
+      setSent(true);
+    } catch (caught) {
+      setError(
+        authErrorMessage(
+          caught,
+          "We could not send that message. Please email gracefieldliveincare@gmail.com or call us.",
+        ),
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -46,7 +79,7 @@ function ContactPage() {
               <div className="flex min-h-[26rem] flex-col items-center justify-center text-center" role="status">
                 <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="h-8 w-8" aria-hidden="true" /></span>
                 <h2 className="mt-6 font-heading text-3xl font-extrabold text-primary">Thank you for getting in touch.</h2>
-                <p className="mt-3 max-w-md text-lg text-muted-foreground">Your message has been noted. The Gracefield team will be ready to help once message sending is connected.</p>
+                <p className="mt-3 max-w-md text-lg text-muted-foreground">Your message is with the Gracefield team. We will reply as soon as we can.</p>
                 <Button type="button" variant="outline" className="mt-7" onClick={() => setSent(false)}>Send another message</Button>
               </div>
             ) : (
@@ -61,7 +94,12 @@ function ContactPage() {
                   </div>
                   <div><Label htmlFor="subject" className="text-base font-bold">I'm getting in touch about</Label><select id="subject" name="subject" defaultValue={about ?? "care"} className="mt-2 h-13 w-full rounded-xl border border-input bg-background px-4 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><option value="care">Live-in care for a family member</option><option value="referral">Referral</option><option value="careers">Careers / becoming a carer</option></select></div>
                   <div><Label htmlFor="message" className="text-base font-bold">Message</Label><Textarea id="message" name="message" required rows={5} className="mt-2 min-h-36 rounded-xl bg-background px-4 py-3 text-base" /></div>
-                  <Button type="submit" size="lg" className="w-full sm:w-auto">Send message</Button>
+                  {error ? (
+                    <p role="alert" className="text-base font-bold text-destructive">{error}</p>
+                  ) : null}
+                  <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={busy}>
+                    {busy ? "Sending…" : "Send message"}
+                  </Button>
                 </form>
               </>
             )}
