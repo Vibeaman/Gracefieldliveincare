@@ -13,7 +13,9 @@ export function pageMeta(
     { property: "og:description", content: description },
     { property: "og:type", content: "website" },
     { property: "og:url", content: url },
+    { property: "og:image", content: `${SITE_URL}/apple-touch-icon.png` },
     { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:image", content: `${SITE_URL}/apple-touch-icon.png` },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
   ];

@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { HoneypotFields } from "@/components/honeypot-fields";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
+import { isLikelySpam } from "@/lib/spam-guard";
 
 export const Route = createFileRoute("/contact")({
   validateSearch: (search: Record<string, unknown>) => ({ about: search["about"] === "careers" ? "careers" : undefined }),
@@ -21,7 +23,16 @@ export const Route = createFileRoute("/contact")({
 function ContactPage() {
   const [sent, setSent] = useState(false);
   const { about } = Route.useSearch();
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setSent(true); };
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    // Bots still see a thank-you. People are not told if they were blocked.
+    if (isLikelySpam(form)) {
+      setSent(true);
+      return;
+    }
+    setSent(true);
+  };
 
   return (
     <>
@@ -41,7 +52,8 @@ function ContactPage() {
             ) : (
               <>
                 <h2 className="font-heading text-2xl font-extrabold text-primary sm:text-3xl">Send us a message</h2>
-                <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+                <form className="relative mt-7 space-y-5" onSubmit={handleSubmit}>
+                  <HoneypotFields />
                   <div><Label htmlFor="full-name" className="text-base font-bold">Full name</Label><Input id="full-name" name="full-name" required autoComplete="name" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" /></div>
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div><Label htmlFor="email" className="text-base font-bold">Email address</Label><Input id="email" name="email" type="email" required autoComplete="email" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" /></div>

@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
+import { HoneypotFields } from "@/components/honeypot-fields";
 import { PageIntro } from "@/components/gracefield";
 import { ensureClientProfile, signInWithEmail } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
+import { isLikelySpam } from "@/lib/spam-guard";
 import { authErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/sign-in")({
@@ -26,6 +28,10 @@ function SignInPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    if (isLikelySpam(form)) {
+      setError("That email or password did not work. Please try again.");
+      return;
+    }
     const email = String(form.get("signin-email") ?? "");
     const password = String(form.get("signin-password") ?? "");
     setBusy(true);
@@ -55,7 +61,8 @@ function SignInPage() {
             <div className="my-6">
               <AuthOrDivider />
             </div>
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form className="relative space-y-5" onSubmit={handleSubmit}>
+              <HoneypotFields />
               <div>
                 <Label htmlFor="signin-email" className="text-base font-bold">Email address</Label>
                 <Input id="signin-email" name="signin-email" type="email" required autoComplete="email" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" />

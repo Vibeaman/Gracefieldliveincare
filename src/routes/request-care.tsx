@@ -5,10 +5,12 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { HoneypotFields } from "@/components/honeypot-fields";
 import { PageIntro } from "@/components/gracefield";
 import { ensureClientProfile, getClientProfile, getUser, isProfileComplete, saveClientDetails } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
+import { isLikelySpam } from "@/lib/spam-guard";
 import { authErrorMessage, getSupabase } from "@/lib/supabase";
 import type { Client } from "@/lib/database.types";
 
@@ -81,6 +83,10 @@ function CareRequestForm({ client }: { client: Client | null }) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    if (isLikelySpam(form)) {
+      setError("We could not send that request. Please try again.");
+      return;
+    }
     const fullName = String(form.get("full-name") ?? client?.full_name ?? "").trim();
     const phone = String(form.get("phone") ?? client?.phone ?? "").trim();
     const careType = String(form.get("care-type") ?? "");
@@ -134,7 +140,8 @@ function CareRequestForm({ client }: { client: Client | null }) {
                 .
               </p>
             ) : null}
-            <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+            <form className="relative mt-7 space-y-5" onSubmit={handleSubmit}>
+              <HoneypotFields />
               {hasDetails ? (
                 <>
                   <input type="hidden" name="full-name" value={client?.full_name ?? ""} />

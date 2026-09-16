@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { HoneypotFields } from "@/components/honeypot-fields";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import careKitchen from "@/assets/gracefield-care-kitchen.jpg";
 import { uploadPublicPhoto } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
+import { isLikelySpam } from "@/lib/spam-guard";
 import { authErrorMessage, getSupabase } from "@/lib/supabase";
 
 const CAREERS_WHATSAPP_DISPLAY = "+44 7584 920625";
@@ -49,6 +51,10 @@ function CareersPage() {
     event.preventDefault();
     if (!photoFile) return;
     const form = new FormData(event.currentTarget);
+    if (isLikelySpam(form)) {
+      setSubmitted(true);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -114,7 +120,8 @@ function CareersPage() {
                 <>
                   <h3 className="font-heading text-2xl font-extrabold text-primary sm:text-3xl">Apply to be a live-in carer</h3>
                   <p className="mt-3 text-base text-muted-foreground">Every field is needed so we can get a clear picture of you.</p>
-                  <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+                  <form className="relative mt-7 space-y-5" onSubmit={handleSubmit}>
+                    <HoneypotFields />
                     <div>
                       <Label htmlFor="applicant-name" className="text-base font-bold">Full name</Label>
                       <Input id="applicant-name" name="applicant-name" required autoComplete="name" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" />

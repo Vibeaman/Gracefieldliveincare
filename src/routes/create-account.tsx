@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
+import { HoneypotFields } from "@/components/honeypot-fields";
 import { PageIntro } from "@/components/gracefield";
 import { ensureClientProfile, signUpWithEmail } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
+import { isLikelySpam } from "@/lib/spam-guard";
 import { authErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/create-account")({
@@ -29,6 +31,10 @@ function CreateAccountPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    if (isLikelySpam(form)) {
+      setNeedsConfirm(true);
+      return;
+    }
     const email = String(form.get("signup-email") ?? "");
     const password = String(form.get("signup-password") ?? "");
     setBusy(true);
@@ -77,7 +83,8 @@ function CreateAccountPage() {
                 <div className="my-6">
                   <AuthOrDivider />
                 </div>
-                <form className="space-y-5" onSubmit={handleSubmit}>
+                <form className="relative space-y-5" onSubmit={handleSubmit}>
+                  <HoneypotFields />
                   <div>
                     <Label htmlFor="signup-email" className="text-base font-bold">Email address</Label>
                     <Input id="signup-email" name="signup-email" type="email" required autoComplete="email" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" />

@@ -1,0 +1,11 @@
+# Gracefield Living in Care
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /account
+Disallow: /sign-in
+Disallow: /create-account
+
+Sitemap: https://gracefieldliveincare.vercel.app/sitemap.xml
