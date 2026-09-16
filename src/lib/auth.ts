@@ -1,5 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { Session, User } from "@supabase/supabase-js";
+import type { Client } from "@/lib/database.types";
 
 export async function getSession(): Promise<Session | null> {
   if (!isSupabaseConfigured()) return null;
@@ -40,6 +41,17 @@ export async function signOut() {
   return getSupabase().auth.signOut();
 }
 
+function nameFromUser(user: User): string {
+  const metadata = user.user_metadata ?? {};
+  if (typeof metadata["full_name"] === "string" && metadata["full_name"].trim()) {
+    return metadata["full_name"].trim();
+  }
+  if (typeof metadata["name"] === "string" && metadata["name"].trim()) {
+    return metadata["name"].trim();
+  }
+  return "";
+}
+
 export async function ensureClientProfile(fullName?: string) {
   const supabase = getSupabase();
   const {
@@ -49,12 +61,12 @@ export async function ensureClientProfile(fullName?: string) {
 
   const { data: existing } = await supabase
     .from("clients")
-    .select("id")
+    .select("id, full_name")
     .eq("id", user.id)
     .maybeSingle();
 
   if (existing) {
-    if (fullName) {
+    if (fullName && !existing.full_name) {
       await supabase.from("clients").update({ full_name: fullName }).eq("id", user.id);
     }
     return;
@@ -62,14 +74,53 @@ export async function ensureClientProfile(fullName?: string) {
 
   await supabase.from("clients").insert({
     id: user.id,
-    full_name:
-      fullName ||
-      (typeof user.user_metadata["full_name"] === "string"
-        ? user.user_metadata["full_name"]
-        : "") ||
-      (typeof user.user_metadata["name"] === "string" ? user.user_metadata["name"] : "") ||
-      "",
+    full_name: fullName || nameFromUser(user),
   });
+}
+
+export async function getClientProfile(): Promise<Client | null> {
+  const supabase = getSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  await ensureClientProfile();
+
+  const { data } = await supabase
+    .from("clients")
+    .select("id, full_name, phone, address, created_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  return data ?? null;
+}
+
+export function isProfileComplete(client: Pick<Client, "full_name" | "phone"> | null): boolean {
+  return Boolean(client?.full_name?.trim() && client?.phone?.trim());
+}
+
+export async function saveClientDetails(details: {
+  full_name: string;
+  phone: string;
+  address?: string;
+}) {
+  const supabase = getSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Please sign in again.");
+
+  await ensureClientProfile(details.full_name);
+  const { error } = await supabase
+    .from("clients")
+    .update({
+      full_name: details.full_name.trim(),
+      phone: details.phone.trim(),
+      address: details.address?.trim() || null,
+    })
+    .eq("id", user.id);
+  if (error) throw error;
 }
 
 export async function uploadPublicPhoto(folder: "applications" | "carers", file: File) {

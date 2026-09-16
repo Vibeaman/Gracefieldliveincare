@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ExternalLink, Mail, MapPin, Menu, Phone, X } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { getUser } from "@/lib/auth";
 
 const navItems = [
   { label: "Home", to: "/" as const },
@@ -26,6 +27,11 @@ export function Wordmark() {
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    void getUser().then((user) => setSignedIn(Boolean(user)));
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-sm">
@@ -46,16 +52,24 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <Link
-            to="/sign-in"
-            className="text-base font-semibold text-foreground/75 transition-colors hover:text-primary"
-            activeProps={{ className: "text-primary" }}
-          >
-            Sign in
-          </Link>
-          <Button asChild variant="outline" size="default" className="h-11 px-5">
-            <Link to="/create-account">Create account</Link>
-          </Button>
+          {signedIn ? (
+            <Button asChild variant="outline" size="default" className="h-11 px-5">
+              <Link to="/account">Your account</Link>
+            </Button>
+          ) : (
+            <>
+              <Link
+                to="/sign-in"
+                className="text-base font-semibold text-foreground/75 transition-colors hover:text-primary"
+                activeProps={{ className: "text-primary" }}
+              >
+                Sign in
+              </Link>
+              <Button asChild variant="outline" size="default" className="h-11 px-5">
+                <Link to="/create-account">Create account</Link>
+              </Button>
+            </>
+          )}
           <Button asChild size="lg">
             <Link to="/contact" search={{ about: undefined }}>Contact us</Link>
           </Button>
@@ -94,22 +108,35 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              to="/sign-in"
-              className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
-              activeProps={{ className: "bg-secondary text-primary" }}
-              onClick={() => setOpen(false)}
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/create-account"
-              className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
-              activeProps={{ className: "bg-secondary text-primary" }}
-              onClick={() => setOpen(false)}
-            >
-              Create account
-            </Link>
+            {signedIn ? (
+              <Link
+                to="/account"
+                className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
+                activeProps={{ className: "bg-secondary text-primary" }}
+                onClick={() => setOpen(false)}
+              >
+                Your account
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/sign-in"
+                  className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
+                  activeProps={{ className: "bg-secondary text-primary" }}
+                  onClick={() => setOpen(false)}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/create-account"
+                  className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
+                  activeProps={{ className: "bg-secondary text-primary" }}
+                  onClick={() => setOpen(false)}
+                >
+                  Create account
+                </Link>
+              </>
+            )}
             <Button asChild size="lg" className="mt-3 w-full">
               <Link to="/contact" search={{ about: undefined }} onClick={() => setOpen(false)}>
                 Contact us

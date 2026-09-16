@@ -3,10 +3,11 @@ import { ClipboardList, UserRound } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
-import { ensureClientProfile, getUser, signOut } from "@/lib/auth";
+import { ensureClientProfile, getUser, isProfileComplete, saveClientDetails, signOut } from "@/lib/auth";
 import {
   BOOKING_STATUS_LABELS,
   formatDate,
@@ -100,6 +101,19 @@ function AccountPage() {
     return <div className="min-h-[40vh] bg-background" />;
   }
 
+  if (!isProfileComplete(client)) {
+    return (
+      <DetailsSetup
+        email={email}
+        client={client}
+        onSaved={() => {
+          setLoading(true);
+          void load();
+        }}
+      />
+    );
+  }
+
   return (
     <>
       <PageIntro eyebrow="Your account" title="Your Gracefield account.">
@@ -149,34 +163,18 @@ function AccountPage() {
               </ul>
             )}
           </article>
-          <article className="surface-card rounded-2xl p-7 sm:p-8">
-            <UserRound className="h-8 w-8 text-brand-gold" aria-hidden="true" />
-            <h2 className="mt-6 font-heading text-2xl font-extrabold text-primary">Your details</h2>
-            <dl className="mt-5 space-y-4 text-base">
-              {[
-                ["Name", client?.full_name || "Not added yet"],
-                ["Email address", email || "Not added yet"],
-                ["Phone number", client?.phone || "Not added yet"],
-              ].map(([label, value]) => (
-                <div key={label}>
-                  <dt className="font-bold text-primary">{label}</dt>
-                  <dd className="text-muted-foreground">{value}</dd>
-                </div>
-              ))}
-            </dl>
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="mt-8 w-full sm:w-auto"
-              onClick={async () => {
-                await signOut();
-                await navigate({ to: "/" });
-              }}
-            >
-              Sign out
-            </Button>
-          </article>
+          <DetailsCard
+            email={email}
+            client={client}
+            onSaved={() => {
+              setLoading(true);
+              void load();
+            }}
+            onSignOut={async () => {
+              await signOut();
+              await navigate({ to: "/" });
+            }}
+          />
         </div>
         {error ? (
           <p role="alert" className="mx-auto mt-8 max-w-5xl text-base font-bold text-destructive">{error}</p>
@@ -188,6 +186,207 @@ function AccountPage() {
         </div>
       </section>
     </>
+  );
+}
+
+function DetailsSetup({
+  email,
+  client,
+  onSaved,
+}: {
+  email: string;
+  client: Client | null;
+  onSaved: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setBusy(true);
+    setError(null);
+    try {
+      await saveClientDetails({
+        full_name: String(form.get("full-name") ?? ""),
+        phone: String(form.get("phone") ?? ""),
+        address: String(form.get("address") ?? ""),
+      });
+      onSaved();
+    } catch (caught) {
+      setError(authErrorMessage(caught, "We could not save those details. Please try again."));
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <PageIntro eyebrow="Your account" title="A few details about you.">
+        <p>We only need your name and phone number. You can change these later.</p>
+      </PageIntro>
+      <section className="section-band px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+        <div className="mx-auto max-w-xl">
+          <div className="surface-card rounded-2xl p-6 sm:p-9">
+            <h2 className="font-heading text-2xl font-extrabold text-primary sm:text-3xl">Your details</h2>
+            <p className="mt-2 text-base text-muted-foreground">
+              Signed in as {email || "your email"}.
+            </p>
+            <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+              <div>
+                <Label htmlFor="full-name" className="text-base font-bold">Your name</Label>
+                <Input
+                  id="full-name"
+                  name="full-name"
+                  required
+                  autoComplete="name"
+                  defaultValue={client?.full_name ?? ""}
+                  className="mt-2 h-13 rounded-xl bg-background px-4 text-base"
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone" className="text-base font-bold">Phone number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  autoComplete="tel"
+                  defaultValue={client?.phone ?? ""}
+                  className="mt-2 h-13 rounded-xl bg-background px-4 text-base"
+                />
+              </div>
+              <div>
+                <Label htmlFor="address" className="text-base font-bold">Address <span className="font-normal text-muted-foreground">(optional)</span></Label>
+                <Input
+                  id="address"
+                  name="address"
+                  autoComplete="street-address"
+                  defaultValue={client?.address ?? ""}
+                  className="mt-2 h-13 rounded-xl bg-background px-4 text-base"
+                />
+              </div>
+              {error ? <p role="alert" className="text-base font-bold text-destructive">{error}</p> : null}
+              <Button type="submit" size="lg" className="w-full" disabled={busy}>
+                {busy ? "Saving…" : "Save and continue"}
+              </Button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function DetailsCard({
+  email,
+  client,
+  onSaved,
+  onSignOut,
+}: {
+  email: string;
+  client: Client | null;
+  onSaved: () => void;
+  onSignOut: () => Promise<void>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setBusy(true);
+    setError(null);
+    try {
+      await saveClientDetails({
+        full_name: String(form.get("full-name") ?? ""),
+        phone: String(form.get("phone") ?? ""),
+        address: String(form.get("address") ?? ""),
+      });
+      setEditing(false);
+      onSaved();
+    } catch (caught) {
+      setError(authErrorMessage(caught, "We could not save those details."));
+      setBusy(false);
+    }
+  };
+
+  return (
+    <article className="surface-card rounded-2xl p-7 sm:p-8">
+      <UserRound className="h-8 w-8 text-brand-gold" aria-hidden="true" />
+      <h2 className="mt-6 font-heading text-2xl font-extrabold text-primary">Your details</h2>
+      {editing ? (
+        <form className="mt-5 space-y-5" onSubmit={handleSubmit}>
+          <div>
+            <Label htmlFor="edit-name" className="text-base font-bold">Your name</Label>
+            <Input
+              id="edit-name"
+              name="full-name"
+              required
+              autoComplete="name"
+              defaultValue={client?.full_name ?? ""}
+              className="mt-2 h-13 rounded-xl bg-background px-4 text-base"
+            />
+          </div>
+          <div>
+            <Label htmlFor="edit-phone" className="text-base font-bold">Phone number</Label>
+            <Input
+              id="edit-phone"
+              name="phone"
+              type="tel"
+              required
+              autoComplete="tel"
+              defaultValue={client?.phone ?? ""}
+              className="mt-2 h-13 rounded-xl bg-background px-4 text-base"
+            />
+          </div>
+          <div>
+            <Label htmlFor="edit-address" className="text-base font-bold">Address <span className="font-normal text-muted-foreground">(optional)</span></Label>
+            <Input
+              id="edit-address"
+              name="address"
+              autoComplete="street-address"
+              defaultValue={client?.address ?? ""}
+              className="mt-2 h-13 rounded-xl bg-background px-4 text-base"
+            />
+          </div>
+          <p className="text-base text-muted-foreground">Email: {email}</p>
+          {error ? <p role="alert" className="text-base font-bold text-destructive">{error}</p> : null}
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={busy}>
+              {busy ? "Saving…" : "Save details"}
+            </Button>
+            <Button type="button" variant="outline" size="lg" className="w-full sm:w-auto" onClick={() => setEditing(false)}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <>
+          <dl className="mt-5 space-y-4 text-base">
+            {[
+              ["Name", client?.full_name || "Not added yet"],
+              ["Email address", email || "Not added yet"],
+              ["Phone number", client?.phone || "Not added yet"],
+              ["Address", client?.address || "Not added yet"],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="font-bold text-primary">{label}</dt>
+                <dd className="text-muted-foreground">{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button type="button" size="lg" className="w-full sm:w-auto" onClick={() => setEditing(true)}>
+              Edit details
+            </Button>
+            <Button type="button" variant="outline" size="lg" className="w-full sm:w-auto" onClick={() => void onSignOut()}>
+              Sign out
+            </Button>
+          </div>
+        </>
+      )}
+    </article>
   );
 }
 
