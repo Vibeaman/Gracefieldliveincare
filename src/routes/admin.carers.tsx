@@ -185,7 +185,7 @@ function CarerForm({
     <AdminScreen
       title={mode === "add" ? "Add a new carer" : `Edit ${carer?.full_name ?? "carer"}`}
       instruction="Fill in the carer's details below, then save."
-      back={{ label: "Back to carers", to: "/admin/carers" }}
+      back={{ label: "Back to carers", onClick: onBack }}
     >
       <AdminCard>
         <form className="grid gap-6" onSubmit={handleSubmit}>

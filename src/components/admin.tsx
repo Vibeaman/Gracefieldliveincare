@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils";
 import { initials, type BookingStatus } from "@/lib/admin-data";
 
 /** Page heading plus the one-line instruction that sits under it. */
+const backLinkClass =
+  "inline-flex min-h-12 items-center gap-2 text-lg font-bold text-primary underline decoration-brand-gold underline-offset-4 hover:text-brand-gold";
+
 export function AdminScreen({
   title,
   instruction,
@@ -16,17 +19,20 @@ export function AdminScreen({
   instruction: string;
   back?: {
     label: string;
-    to: "/admin" | "/admin/bookings" | "/admin/carers" | "/admin/applications";
+    to?: "/admin" | "/admin/bookings" | "/admin/carers" | "/admin/applications";
+    onClick?: () => void;
   };
   children: ReactNode;
 }) {
   return (
     <div className="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
-      {back ? (
-        <Link
-          to={back.to}
-          className="inline-flex min-h-12 items-center gap-2 text-lg font-bold text-primary underline decoration-brand-gold underline-offset-4 hover:text-brand-gold"
-        >
+      {back?.onClick ? (
+        <button type="button" onClick={back.onClick} className={backLinkClass}>
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+          {back.label}
+        </button>
+      ) : back?.to ? (
+        <Link to={back.to} className={backLinkClass}>
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           {back.label}
         </Link>

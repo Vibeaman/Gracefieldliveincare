@@ -77,7 +77,7 @@ function ApplicationDetail({
     <AdminScreen
       title={application.full_name}
       instruction="Read their application, then choose below."
-      back={{ label: "Back to applications", to: "/admin/applications" }}
+      back={{ label: "Back to applications", onClick: onBack }}
     >
       <div className="grid gap-6">
         <AdminCard>

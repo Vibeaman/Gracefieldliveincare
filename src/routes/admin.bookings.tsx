@@ -84,7 +84,7 @@ function BookingDetail({ booking, onBack }: { booking: Booking; onBack: () => vo
     <AdminScreen
       title={booking.client_name}
       instruction="Choose a carer for this request, then update the status."
-      back={{ label: "Back to bookings", to: "/admin/bookings" }}
+      back={{ label: "Back to bookings", onClick: onBack }}
     >
       <div className="grid gap-6">
         <AdminCard>
