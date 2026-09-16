@@ -1,12 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { contactToEmail, sendResendEmail } from "@/lib/mail";
 import { getServiceSupabase } from "@/lib/supabase.server";
-
-const CONTACT_TO =
-  process.env["CONTACT_TO_EMAIL"] ?? "gracefieldliveincare@gmail.com";
-const FROM_EMAIL =
-  process.env["RESEND_FROM_EMAIL"] ?? "Gracefield Living in Care <onboarding@resend.dev>";
 
 const SUBJECT_LABELS = {
   care: "Live-in care for a family member",
@@ -48,11 +44,6 @@ export const sendContactMessage = createServerFn({ method: "POST" })
       throw new Error("We could not send that message. Please email gracefieldliveincare@gmail.com or call us.");
     }
 
-    const apiKey = process.env["RESEND_API_KEY"];
-    if (!apiKey) {
-      return { ok: true as const };
-    }
-
     const topic = SUBJECT_LABELS[data.subject];
     const phoneLine = data.phone ? data.phone : "Not given";
     const text = [
@@ -66,25 +57,12 @@ export const sendContactMessage = createServerFn({ method: "POST" })
       data.message,
     ].join("\n");
 
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: [CONTACT_TO],
-        reply_to: data.email,
-        subject: `Website enquiry: ${topic}`,
-        text,
-      }),
+    await sendResendEmail({
+      to: contactToEmail(),
+      replyTo: data.email,
+      subject: `Website enquiry: ${topic}`,
+      text,
     });
-
-    if (!response.ok) {
-      const body = await response.text();
-      console.error("Contact email failed:", response.status, body);
-    }
 
     return { ok: true as const };
   });

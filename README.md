@@ -20,9 +20,13 @@ Admin screens: [http://localhost:3000/admin](http://localhost:3000/admin). Defau
 ## Supabase setup
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In **Authentication → Providers**, turn on **Email** and **Google**. For Google you need a Google Cloud OAuth client ID and secret. Add `https://YOUR_PROJECT.supabase.co/auth/v1/callback` as an authorised redirect URI. Under **Authentication → URL configuration → Redirect URLs**, add:
+2. In **Authentication → Providers**, turn on **Email** and **Google**. For Google you need a Google Cloud OAuth client ID and secret. Add these authorised redirect URIs in Google Cloud:
+   - `https://YOUR_PROJECT.supabase.co/auth/v1/callback`
+   Under **Authentication → URL configuration**, set the Site URL to `https://www.gracefieldliveincare.com` and add Redirect URLs:
    - `https://www.gracefieldliveincare.com/account`
    - `https://www.gracefieldliveincare.com/reset-password`
+   - `https://gracefieldliveincare.com/account`
+   - `https://gracefieldliveincare.com/reset-password`
    Password reset emails are sent by Supabase (not Resend).
 3. Open **SQL Editor**, paste `supabase/schema.sql`, and run it. That creates tables, Row Level Security, the new-user trigger, and a public `photos` storage bucket. If the rest of the schema is already live, run `supabase/enquiries.sql` once so contact-form messages are stored.
 4. Copy the project URL, anon key, and service role key from **Project Settings → API** into `.env.local` and into Vercel.
@@ -39,7 +43,7 @@ The repo is already set up for Vercel (Nitro plugin + `vercel.json` framework pr
    - `SUPABASE_URL` (same value as `VITE_SUPABASE_URL`)
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_PASSCODE` (server only — do not use a VITE_ prefix)
-   - `RESEND_API_KEY` (for the contact form and emails when a booking status changes)
+   - `RESEND_API_KEY` (for the contact form, booking-status emails, and new-application alerts)
    - `RESEND_FROM_EMAIL` (optional; defaults to Resend's test sender until a domain is verified)
    - `CONTACT_TO_EMAIL` (optional; defaults to gracefieldliveincare@gmail.com)
    - `SITE_URL` (optional; defaults to https://www.gracefieldliveincare.com)

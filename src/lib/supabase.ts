@@ -45,6 +45,15 @@ export function authErrorMessage(error: unknown, fallback: string): string {
     if (message.toLowerCase().includes("already registered")) {
       return "That email already has an account. Sign in instead.";
     }
+    if (
+      message.toLowerCase().includes("provider is not enabled") ||
+      message.toLowerCase().includes("unsupported provider")
+    ) {
+      return "Google sign-in is not switched on yet. Please use email and password, or try again shortly.";
+    }
+    if (message.toLowerCase().includes("redirect")) {
+      return "Google could not send you back to Gracefield. Please try again, or sign in with email.";
+    }
     return message;
   }
   return fallback;

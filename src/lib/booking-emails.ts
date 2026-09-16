@@ -1,10 +1,9 @@
 import type { BookingStatus } from "@/lib/database.types";
+import { contactToEmail, sendResendEmail } from "@/lib/mail";
 import { getServiceSupabase } from "@/lib/supabase.server";
 
 const SITE_URL =
   process.env["SITE_URL"] ?? "https://www.gracefieldliveincare.com";
-const FROM_EMAIL =
-  process.env["RESEND_FROM_EMAIL"] ?? "Gracefield Living in Care <onboarding@resend.dev>";
 
 type StatusEmail = {
   subject: string;
@@ -62,12 +61,6 @@ export async function sendBookingStatusEmail(options: {
 }): Promise<void> {
   if (options.status === options.previousStatus) return;
 
-  const apiKey = process.env["RESEND_API_KEY"];
-  if (!apiKey) {
-    console.warn("RESEND_API_KEY is not set. Skipping booking status email.");
-    return;
-  }
-
   const content = emailForStatus(options.status, "");
   if (!content) return;
 
@@ -80,23 +73,10 @@ export async function sendBookingStatusEmail(options: {
   const email = emailForStatus(options.status, recipient.name);
   if (!email) return;
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: FROM_EMAIL,
-      to: [recipient.email],
-      reply_to: "gracefieldliveincare@gmail.com",
-      subject: email.subject,
-      text: email.text,
-    }),
+  await sendResendEmail({
+    to: recipient.email,
+    replyTo: contactToEmail(),
+    subject: email.subject,
+    text: email.text,
   });
-
-  if (!response.ok) {
-    const body = await response.text();
-    console.error("Resend email failed:", response.status, body);
-  }
 }

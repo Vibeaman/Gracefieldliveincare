@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { HoneypotFields } from "@/components/honeypot-fields";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import careKitchen from "@/assets/gracefield-care-kitchen.jpg";
+import { notifyNewApplication } from "@/lib/application.functions";
 import { uploadPublicPhoto } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
@@ -70,6 +71,18 @@ function CareersPage() {
         status: "pending",
       });
       if (insertError) throw insertError;
+      const fullName = String(form.get("applicant-name") ?? "");
+      const email = String(form.get("applicant-email") ?? "");
+      const phone = String(form.get("applicant-phone") ?? "");
+      const yearsExperience = String(form.get("applicant-experience") ?? "");
+      const availability = String(form.get("applicant-availability") ?? "");
+      try {
+        await notifyNewApplication({
+          data: { fullName, email, phone, yearsExperience, availability },
+        });
+      } catch (notifyError) {
+        console.error("Application email failed:", notifyError);
+      }
       setSubmitted(true);
     } catch (caught) {
       setError(authErrorMessage(caught, "We could not send that application. Please try again."));

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PersonAvatar } from "@/components/admin";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
-import { ensureClientProfile, getUser, isProfileComplete, saveClientDetails, signOut } from "@/lib/auth";
+import { ensureClientProfile, isProfileComplete, saveClientDetails, signOut, waitForUser } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
 import {
@@ -38,7 +38,7 @@ function AccountPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
-    const user = await getUser();
+    const user = await waitForUser();
     if (!user) {
       await navigate({ to: "/sign-in" });
       return;

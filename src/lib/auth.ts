@@ -14,6 +14,37 @@ export async function getUser(): Promise<User | null> {
   return session?.user ?? null;
 }
 
+/** Wait for a session after Google or a password-reset link lands. */
+export async function waitForUser(timeoutMs = 4000): Promise<User | null> {
+  const existing = await getUser();
+  if (existing) return existing;
+  if (!isSupabaseConfigured()) return null;
+
+  return new Promise((resolve) => {
+    const supabase = getSupabase();
+    let settled = false;
+    let unsubscribe: (() => void) | undefined;
+    let timer: number | undefined;
+
+    const finish = (user: User | null) => {
+      if (settled) return;
+      settled = true;
+      unsubscribe?.();
+      if (timer !== undefined) window.clearTimeout(timer);
+      resolve(user);
+    };
+
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) finish(session.user);
+    });
+    unsubscribe = () => data.subscription.unsubscribe();
+
+    timer = window.setTimeout(() => {
+      void getUser().then(finish);
+    }, timeoutMs);
+  });
+}
+
 export async function signUpWithEmail(email: string, password: string) {
   return getSupabase().auth.signUp({
     email,
