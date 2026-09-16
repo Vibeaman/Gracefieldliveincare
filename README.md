@@ -45,7 +45,7 @@ The repo is already set up for Vercel (Nitro plugin + `vercel.json` framework pr
    - `SITE_URL` (optional; defaults to https://www.gracefieldliveincare.com)
 4. Deploy.
 
-After the first deploy, every push to `main` ships a new production build. If you change environment variables later, trigger a new deploy so the build picks them up.
+After the first deploy, every push to `main` ships a new production build. If you change environment variables later, trigger a new deploy so the running app picks them up.
 
 Live paths:
 
