@@ -39,7 +39,7 @@ The repo is already set up for Vercel (Nitro plugin + `vercel.json` framework pr
    - `VITE_ADMIN_PASSCODE` (same value as `ADMIN_PASSCODE`)
 4. Deploy.
 
-After the first deploy, every push to `main` ships a new production build.
+After the first deploy, every push to `main` ships a new production build. If you change environment variables later, trigger a new deploy so the build picks them up.
 
 Live paths:
 
