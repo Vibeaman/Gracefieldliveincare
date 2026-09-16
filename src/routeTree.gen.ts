@@ -12,12 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CreateAccountRouteImport } from './routes/create-account'
 import { Route as LiveInCareRouteImport } from './routes/live-in-care'
 import { Route as RequestCareRouteImport } from './routes/request-care'
 import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
+import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
+import { Route as AdminCarersRouteImport } from './routes/admin.carers'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,6 +37,11 @@ const AboutRoute = AboutRouteImport.update({
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CareersRoute = CareersRouteImport.update({
@@ -64,17 +74,42 @@ const SignInRoute = SignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCarersRoute = AdminCarersRouteImport.update({
+  id: '/carers',
+  path: '/carers',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/create-account': typeof CreateAccountRoute
   '/live-in-care': typeof LiveInCareRoute
   '/request-care': typeof RequestCareRoute
   '/sign-in': typeof SignInRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/carers': typeof AdminCarersRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,18 +121,27 @@ export interface FileRoutesByTo {
   '/live-in-care': typeof LiveInCareRoute
   '/request-care': typeof RequestCareRoute
   '/sign-in': typeof SignInRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/carers': typeof AdminCarersRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/create-account': typeof CreateAccountRoute
   '/live-in-care': typeof LiveInCareRoute
   '/request-care': typeof RequestCareRoute
   '/sign-in': typeof SignInRoute
+  '/admin/applications': typeof AdminApplicationsRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/carers': typeof AdminCarersRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -105,12 +149,17 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/admin'
     | '/careers'
     | '/contact'
     | '/create-account'
     | '/live-in-care'
     | '/request-care'
     | '/sign-in'
+    | '/admin/applications'
+    | '/admin/bookings'
+    | '/admin/carers'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,23 +171,33 @@ export interface FileRouteTypes {
     | '/live-in-care'
     | '/request-care'
     | '/sign-in'
+    | '/admin/applications'
+    | '/admin/bookings'
+    | '/admin/carers'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/account'
+    | '/admin'
     | '/careers'
     | '/contact'
     | '/create-account'
     | '/live-in-care'
     | '/request-care'
     | '/sign-in'
+    | '/admin/applications'
+    | '/admin/bookings'
+    | '/admin/carers'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
   CreateAccountRoute: typeof CreateAccountRoute
@@ -168,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/careers': {
@@ -212,13 +278,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/applications': {
+      id: '/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AdminApplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/carers': {
+      id: '/admin/carers'
+      path: '/carers'
+      fullPath: '/admin/carers'
+      preLoaderRoute: typeof AdminCarersRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminApplicationsRoute: typeof AdminApplicationsRoute
+  AdminBookingsRoute: typeof AdminBookingsRoute
+  AdminCarersRoute: typeof AdminCarersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminApplicationsRoute: AdminApplicationsRoute,
+  AdminBookingsRoute: AdminBookingsRoute,
+  AdminCarersRoute: AdminCarersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  AdminRoute: AdminRouteWithChildren,
   CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
   CreateAccountRoute: CreateAccountRoute,
