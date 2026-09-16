@@ -20,7 +20,10 @@ Admin screens: [http://localhost:3000/admin](http://localhost:3000/admin). Defau
 ## Supabase setup
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In **Authentication → Providers**, turn on **Email** and **Google**. For Google you need a Google Cloud OAuth client ID and secret. Add `https://YOUR_PROJECT.supabase.co/auth/v1/callback` as an authorised redirect URI, and add your live site (`https://gracefieldliveincare.vercel.app/account`) under **Authentication → URL configuration → Redirect URLs**.
+2. In **Authentication → Providers**, turn on **Email** and **Google**. For Google you need a Google Cloud OAuth client ID and secret. Add `https://YOUR_PROJECT.supabase.co/auth/v1/callback` as an authorised redirect URI. Under **Authentication → URL configuration → Redirect URLs**, add:
+   - `https://gracefieldliveincare.vercel.app/account`
+   - `https://gracefieldliveincare.vercel.app/reset-password`
+   Password reset emails are sent by Supabase (not Resend). No custom domain is required for that.
 3. Open **SQL Editor**, paste `supabase/schema.sql`, and run it. That creates tables, Row Level Security, the new-user trigger, and a public `photos` storage bucket.
 4. Copy the project URL, anon key, and service role key from **Project Settings → API** into `.env.local` and into Vercel.
 
@@ -48,6 +51,7 @@ Live paths:
 
 - Public site: `/`
 - Sign in / create account: `/sign-in`, `/create-account`
+- Forgot / reset password: `/forgot-password`, `/reset-password`
 - Care request (after sign in): `/request-care`
 - Client account: `/account`
 - Admin: `/admin` (not linked from the public nav)

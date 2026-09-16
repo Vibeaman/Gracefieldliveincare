@@ -41,6 +41,16 @@ export async function signOut() {
   return getSupabase().auth.signOut();
 }
 
+export async function requestPasswordReset(email: string) {
+  return getSupabase().auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+}
+
+export async function updatePassword(password: string) {
+  return getSupabase().auth.updateUser({ password });
+}
+
 function nameFromUser(user: User): string {
   const metadata = user.user_metadata ?? {};
   if (typeof metadata["full_name"] === "string" && metadata["full_name"].trim()) {

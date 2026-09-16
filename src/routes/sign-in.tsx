@@ -68,7 +68,12 @@ function SignInPage() {
                 <Input id="signin-email" name="signin-email" type="email" required autoComplete="email" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" />
               </div>
               <div>
-                <Label htmlFor="signin-password" className="text-base font-bold">Password</Label>
+                <div className="flex items-baseline justify-between gap-3">
+                  <Label htmlFor="signin-password" className="text-base font-bold">Password</Label>
+                  <Link to="/forgot-password" className="text-sm font-bold text-primary underline decoration-brand-gold underline-offset-4">
+                    Forgot password?
+                  </Link>
+                </div>
                 <Input id="signin-password" name="signin-password" type="password" required autoComplete="current-password" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" />
               </div>
               {error ? (
