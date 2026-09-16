@@ -173,7 +173,8 @@ create policy "reviews_insert_own_completed"
       where b.id = booking_id
         and b.client_id = auth.uid()
         and b.status = 'completed'
-        and b.assigned_carer_id = reviews.carer_id
+        and b.assigned_carer_id is not null
+        and b.assigned_carer_id = carer_id
     )
   );
 

@@ -145,6 +145,21 @@ function AccountPage() {
                     <span className="mt-3 inline-flex rounded-full border border-primary/25 bg-secondary px-4 py-1.5 text-sm font-bold text-primary">
                       {BOOKING_STATUS_LABELS[booking.status]}
                     </span>
+                    {booking.status === "assigned" ? (
+                      <p className="mt-3 text-base text-muted-foreground">
+                        Your care request has been accepted. Please check your email for the details.
+                      </p>
+                    ) : null}
+                    {booking.status === "active" ? (
+                      <p className="mt-3 text-base text-muted-foreground">
+                        Your live-in care has started. Please check your email if you have not already.
+                      </p>
+                    ) : null}
+                    {booking.status === "completed" ? (
+                      <p className="mt-3 text-base text-muted-foreground">
+                        This care period has ended. Please check your email, and leave a review below if you have not already.
+                      </p>
+                    ) : null}
                     {booking.status !== "pending" && booking.carer ? (
                       <div className="mt-4 flex gap-4 rounded-2xl border border-border bg-secondary/40 p-4">
                         <PersonAvatar
@@ -169,9 +184,9 @@ function AccountPage() {
                         <p className="mt-3 text-base text-muted-foreground">
                           Your review: {booking.review.rating} out of 5
                         </p>
-                      ) : (
+                      ) : booking.assigned_carer_id || booking.carer?.id ? (
                         <LeaveReview booking={booking} onSaved={() => void load()} />
-                      )
+                      ) : null
                     ) : null}
                   </li>
                 ))}
@@ -418,7 +433,11 @@ function LeaveReview({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!booking.assigned_carer_id) return;
+    const carerId = booking.assigned_carer_id ?? booking.carer?.id ?? null;
+    if (!carerId) {
+      setError("A carer has not been assigned to this request yet, so a review cannot be saved.");
+      return;
+    }
     const form = new FormData(event.currentTarget);
     const rating = Number(form.get("rating"));
     const comment = String(form.get("comment") ?? "");
@@ -426,7 +445,7 @@ function LeaveReview({
     setError(null);
     const { error: insertError } = await getSupabase().from("reviews").insert({
       booking_id: booking.id,
-      carer_id: booking.assigned_carer_id,
+      carer_id: carerId,
       rating,
       comment,
     });

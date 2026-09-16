@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/lib/auth";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 
 const navItems = [
   { label: "Home", to: "/" as const },
@@ -31,6 +32,11 @@ export function SiteHeader() {
 
   useEffect(() => {
     void getUser().then((user) => setSignedIn(Boolean(user)));
+    if (!isSupabaseConfigured()) return;
+    const { data } = getSupabase().auth.onAuthStateChange((_event, session) => {
+      setSignedIn(Boolean(session?.user));
+    });
+    return () => data.subscription.unsubscribe();
   }, []);
 
   return (

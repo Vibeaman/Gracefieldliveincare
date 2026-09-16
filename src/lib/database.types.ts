@@ -74,9 +74,9 @@ export type AdminBooking = Booking & {
 };
 
 export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
-  pending: "Pending",
-  assigned: "Assigned",
-  active: "Active",
+  pending: "Waiting",
+  assigned: "Accepted",
+  active: "Care started",
   completed: "Completed",
 };
 
