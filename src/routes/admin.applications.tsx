@@ -5,13 +5,18 @@ import { Button } from "@/components/ui/button";
 import {
   AdminCard,
   AdminScreen,
+  ConfirmRemoveButton,
   DetailRow,
   PersonAvatar,
   SavedNote,
   TapRow,
 } from "@/components/admin";
 import { getAdminPasscode } from "@/lib/admin-session";
-import { decideAdminApplication, listAdminApplications } from "@/lib/admin.functions";
+import {
+  decideAdminApplication,
+  deleteAdminApplication,
+  listAdminApplications,
+} from "@/lib/admin.functions";
 import { APPLICATION_STATUS_LABELS, formatDate, type Application } from "@/lib/database.types";
 
 export const Route = createFileRoute("/admin/applications")({
@@ -197,6 +202,20 @@ function ApplicationDetail({
             </SavedNote>
           </AdminCard>
         )}
+
+        <ConfirmRemoveButton
+          label="Delete this application"
+          title="Delete this application?"
+          description={`This will take ${application.full_name} off your applications list. You cannot undo this.`}
+          confirmLabel="Yes, delete it"
+          onConfirm={async () => {
+            await deleteAdminApplication({
+              data: { passcode: getAdminPasscode(), id: application.id },
+            });
+            onBack();
+            await onChanged();
+          }}
+        />
 
         <Button variant="outline" size="lg" className="h-16 w-full text-lg" onClick={onBack}>
           Back to applications

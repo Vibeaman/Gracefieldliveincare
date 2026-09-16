@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { AdminCard, AdminScreen, DetailRow, TapRow } from "@/components/admin";
+import { AdminCard, AdminScreen, ConfirmRemoveButton, DetailRow, TapRow } from "@/components/admin";
 import { getAdminPasscode } from "@/lib/admin-session";
-import { listAdminEnquiries } from "@/lib/admin.functions";
+import { deleteAdminEnquiry, listAdminEnquiries } from "@/lib/admin.functions";
 import { ENQUIRY_SUBJECT_LABELS, formatDate, type Enquiry } from "@/lib/database.types";
 
 export const Route = createFileRoute("/admin/enquiries")({
@@ -42,7 +42,16 @@ function AdminEnquiriesPage() {
   const open = enquiries.find((enquiry) => enquiry.id === openId) ?? null;
 
   if (open) {
-    return <EnquiryDetail enquiry={open} onBack={() => setOpenId(null)} />;
+    return (
+      <EnquiryDetail
+        enquiry={open}
+        onBack={() => setOpenId(null)}
+        onDeleted={async () => {
+          setOpenId(null);
+          await load();
+        }}
+      />
+    );
   }
 
   return (
@@ -87,9 +96,11 @@ function AdminEnquiriesPage() {
 function EnquiryDetail({
   enquiry,
   onBack,
+  onDeleted,
 }: {
   enquiry: Enquiry;
   onBack: () => void;
+  onDeleted: () => Promise<void>;
 }) {
   return (
     <AdminScreen
@@ -116,6 +127,18 @@ function EnquiryDetail({
             </Button>
           ) : null}
         </div>
+        <ConfirmRemoveButton
+          label="Delete this enquiry"
+          title="Delete this enquiry?"
+          description="This will take the message off your list. You cannot undo this."
+          confirmLabel="Yes, delete it"
+          onConfirm={async () => {
+            await deleteAdminEnquiry({
+              data: { passcode: getAdminPasscode(), id: enquiry.id },
+            });
+            await onDeleted();
+          }}
+        />
         <Button variant="outline" size="lg" className="h-16 w-full text-lg" onClick={onBack}>
           Back to enquiries
         </Button>

@@ -84,6 +84,16 @@ export const updateAdminBooking = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+export const deleteAdminBooking = createServerFn({ method: "POST" })
+  .validator(z.object({ passcode: z.string().min(1), id: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    requireAdminPasscode(data.passcode);
+    const supabase = getServiceSupabase();
+    const { error } = await supabase.from("bookings").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
 export const listAdminCarers = createServerFn({ method: "POST" })
   .validator(passcodeSchema)
   .handler(async ({ data }): Promise<Carer[]> => {
@@ -150,6 +160,16 @@ export const listAdminEnquiries = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
+export const deleteAdminEnquiry = createServerFn({ method: "POST" })
+  .validator(z.object({ passcode: z.string().min(1), id: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    requireAdminPasscode(data.passcode);
+    const supabase = getServiceSupabase();
+    const { error } = await supabase.from("enquiries").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
 export const listAdminApplications = createServerFn({ method: "POST" })
   .validator(passcodeSchema)
   .handler(async ({ data }): Promise<Application[]> => {
@@ -199,6 +219,16 @@ export const decideAdminApplication = createServerFn({ method: "POST" })
       if (insertError) throw new Error(insertError.message);
     }
 
+    return { ok: true as const };
+  });
+
+export const deleteAdminApplication = createServerFn({ method: "POST" })
+  .validator(z.object({ passcode: z.string().min(1), id: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    requireAdminPasscode(data.passcode);
+    const supabase = getServiceSupabase();
+    const { error } = await supabase.from("applications").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
     return { ok: true as const };
   });
 

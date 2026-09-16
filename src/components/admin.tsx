@@ -1,7 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import type { ComponentType, ReactNode } from "react";
+import { useState, type ComponentType, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { initials, type BookingStatus } from "@/lib/database.types";
 
@@ -204,5 +215,70 @@ export function DetailRow({ label, value }: { label: string; value: ReactNode })
       <p className="text-base font-bold text-muted-foreground">{label}</p>
       <p className="mt-1 text-lg text-foreground">{value}</p>
     </div>
+  );
+}
+
+/** Confirm before deleting a booking, application or enquiry. */
+export function ConfirmRemoveButton({
+  label,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel = "No, keep it",
+  onConfirm,
+}: {
+  label: string;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  cancelLabel?: string;
+  onConfirm: () => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="lg"
+        className="h-16 w-full text-lg"
+        onClick={() => setOpen(true)}
+      >
+        {label}
+      </Button>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent className="max-w-md rounded-2xl p-7">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-heading text-2xl font-extrabold text-primary">
+              {title}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-lg text-muted-foreground">
+              {description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 flex-col gap-3 sm:flex-col">
+            <AlertDialogAction
+              className="h-16 w-full text-lg"
+              disabled={busy}
+              onClick={(event) => {
+                event.preventDefault();
+                setBusy(true);
+                void onConfirm().finally(() => {
+                  setBusy(false);
+                  setOpen(false);
+                });
+              }}
+            >
+              {busy ? "Removing…" : confirmLabel}
+            </AlertDialogAction>
+            <AlertDialogCancel className="mt-0 h-16 w-full text-lg" disabled={busy}>
+              {cancelLabel}
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   AdminCard,
   AdminScreen,
+  ConfirmRemoveButton,
   DetailRow,
   FieldLabel,
   SavedNote,
@@ -13,7 +14,12 @@ import {
   fieldClasses,
 } from "@/components/admin";
 import { getAdminPasscode } from "@/lib/admin-session";
-import { listAdminBookings, listAdminCarers, updateAdminBooking } from "@/lib/admin.functions";
+import {
+  deleteAdminBooking,
+  listAdminBookings,
+  listAdminCarers,
+  updateAdminBooking,
+} from "@/lib/admin.functions";
 import {
   BOOKING_STATUS_LABELS,
   BOOKING_STATUS_ORDER,
@@ -80,6 +86,10 @@ function AdminBookingsPage() {
         onSaved={async () => {
           await load();
         }}
+        onDeleted={async () => {
+          setOpenBookingId(null);
+          await load();
+        }}
       />
     );
   }
@@ -129,11 +139,13 @@ function BookingDetail({
   carers,
   onBack,
   onSaved,
+  onDeleted,
 }: {
   booking: AdminBooking;
   carers: Carer[];
   onBack: () => void;
   onSaved: () => Promise<void>;
+  onDeleted: () => Promise<void>;
 }) {
   const [carerId, setCarerId] = useState<string>(booking.assigned_carer_id ?? "");
   const [status, setStatus] = useState<BookingStatus>(booking.status);
@@ -240,6 +252,19 @@ function BookingDetail({
             </div>
           ) : null}
         </AdminCard>
+
+        <ConfirmRemoveButton
+          label="Delete this request"
+          title="Delete this care request?"
+          description="This will take the request off your list. You cannot undo this."
+          confirmLabel="Yes, delete it"
+          onConfirm={async () => {
+            await deleteAdminBooking({
+              data: { passcode: getAdminPasscode(), id: booking.id },
+            });
+            await onDeleted();
+          }}
+        />
 
         <Button variant="outline" size="lg" className="h-16 w-full text-lg" onClick={onBack}>
           Back to bookings
