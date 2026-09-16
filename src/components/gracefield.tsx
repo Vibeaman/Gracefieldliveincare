@@ -137,7 +137,7 @@ export function SiteFooter() {
             <h2 className="font-heading text-base font-extrabold text-primary">Contact us</h2>
             <div className="space-y-3 text-base text-muted-foreground">
               <a href="tel:+447584920625" className="flex items-center gap-3 hover:text-primary"><Phone className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" /><span>+44 7584 920625</span></a>
-              <a href="mailto:hello@gracefieldlivingincare.co.uk" className="flex items-center gap-3 hover:text-primary"><Mail className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" /><span>hello@gracefieldlivingincare.co.uk</span></a>
+              <a href="mailto:gracefieldliveincare@gmail.com" className="flex items-center gap-3 hover:text-primary"><Mail className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" /><span>gracefieldliveincare@gmail.com</span></a>
               <div className="flex items-start gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" /><div className="not-italic"><p className="not-italic">11 Blue Close, Workington, CA14 3FJ</p><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1"><a className="inline-flex items-center gap-1.5 hover:text-primary" href="https://www.google.com/maps/search/?api=1&query=11+Blue+Close%2C+Workington%2C+CA14+3FJ" target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" aria-hidden="true" /> Google Maps</a><a className="inline-flex items-center gap-1.5 hover:text-primary" href="https://maps.apple.com/?q=11+Blue+Close%2C+Workington%2C+CA14+3FJ" target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" aria-hidden="true" /> Apple Maps</a></div></div></div>
             </div>
           </div>
