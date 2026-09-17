@@ -161,7 +161,7 @@ function TrainingPage() {
                 If you only need a clean, that is fine too.
               </p>
               <Button asChild size="lg" className="mt-8 w-full sm:w-auto">
-                <Link to="/contact" search={{ about: "care" }}>
+                <Link to="/contact" search={{ about: undefined }}>
                   Ask about cleaning
                 </Link>
               </Button>

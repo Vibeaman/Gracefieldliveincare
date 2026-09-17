@@ -10,9 +10,12 @@ const navItems = [
   { label: "Home", to: "/" as const },
   { label: "About", to: "/about" as const },
   { label: "What we do", to: "/what-we-do" as const },
-  { label: "Live-in Care", to: "/live-in-care" as const },
+  { label: "Live-in care", to: "/live-in-care" as const },
+  { label: "Training", to: "/training" as const },
   { label: "Careers", to: "/careers" as const },
 ];
+
+const desktopNavItems = navItems.filter((item) => item.to !== "/");
 
 export function Wordmark() {
   return (
@@ -45,44 +48,70 @@ export function SiteHeader() {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const closeOnDesktop = () => {
+      if (window.matchMedia("(min-width: 1024px)").matches) setOpen(false);
+    };
+    window.addEventListener("resize", closeOnDesktop);
+    return () => window.removeEventListener("resize", closeOnDesktop);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const accountLabel = carer ? "Your work" : "Your account";
+  const accountTo = carer ? "/carer" : "/account";
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto grid min-h-20 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:px-8 lg:px-12">
-        <Link to="/" aria-label="Gracefield home" onClick={() => setOpen(false)}>
+      <div className="mx-auto flex min-h-[4.5rem] max-w-7xl items-center justify-between gap-3 px-4 sm:min-h-20 sm:px-6 lg:px-8 xl:px-12">
+        <Link to="/" aria-label="Gracefield home" className="shrink-0" onClick={() => setOpen(false)}>
           <Wordmark />
         </Link>
 
-        <nav className="hidden items-center gap-5 lg:flex" aria-label="Main navigation">
-          {navItems.map((item) => (
+        <nav className="hidden min-w-0 flex-1 items-center justify-end gap-x-3 lg:flex xl:gap-x-5" aria-label="Main navigation">
+          {desktopNavItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              activeOptions={{ exact: item.to === "/" }}
-              className="text-base font-semibold text-foreground/75 transition-colors hover:text-primary"
+              className="whitespace-nowrap text-sm font-semibold text-foreground/75 transition-colors hover:text-primary xl:text-base"
               activeProps={{ className: "text-primary" }}
             >
               {item.label}
             </Link>
           ))}
+          <span className="hidden h-5 w-px bg-border xl:block" aria-hidden="true" />
           {signedIn ? (
-            <Button asChild variant="outline" size="default" className="h-11 px-5">
-              <Link to={carer ? "/carer" : "/account"}>{carer ? "Your work" : "Your account"}</Link>
-            </Button>
+            <Link
+              to={accountTo}
+              className="whitespace-nowrap text-sm font-semibold text-foreground/75 transition-colors hover:text-primary xl:text-base"
+              activeProps={{ className: "text-primary" }}
+            >
+              {accountLabel}
+            </Link>
           ) : (
             <>
               <Link
                 to="/sign-in"
-                className="text-base font-semibold text-foreground/75 transition-colors hover:text-primary"
+                className="whitespace-nowrap text-sm font-semibold text-foreground/75 transition-colors hover:text-primary xl:text-base"
                 activeProps={{ className: "text-primary" }}
               >
                 Sign in
               </Link>
-              <Button asChild variant="outline" size="default" className="h-11 px-5">
-                <Link to="/create-account">Create account</Link>
-              </Button>
+              <Link
+                to="/create-account"
+                className="hidden whitespace-nowrap text-sm font-semibold text-foreground/75 transition-colors hover:text-primary xl:inline xl:text-base"
+                activeProps={{ className: "text-primary" }}
+              >
+                Create account
+              </Link>
             </>
           )}
-          <Button asChild size="lg">
+          <Button asChild className="h-10 shrink-0 px-4 text-sm xl:h-11 xl:px-5 xl:text-base">
             <Link to="/contact" search={{ about: undefined }}>Contact us</Link>
           </Button>
         </nav>
@@ -104,7 +133,7 @@ export function SiteHeader() {
       {open ? (
         <nav
           id="mobile-navigation"
-          className="border-t border-border bg-background px-5 py-5 lg:hidden"
+          className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-border bg-background px-4 py-4 sm:px-6 lg:hidden"
           aria-label="Mobile navigation"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
@@ -122,12 +151,12 @@ export function SiteHeader() {
             ))}
             {signedIn ? (
               <Link
-                to={carer ? "/carer" : "/account"}
+                to={accountTo}
                 className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
                 activeProps={{ className: "bg-secondary text-primary" }}
                 onClick={() => setOpen(false)}
               >
-                {carer ? "Your work" : "Your account"}
+                {accountLabel}
               </Link>
             ) : (
               <>
@@ -165,6 +194,8 @@ const footerMenu = [
   { label: "Home", to: "/" as const },
   { label: "About us", to: "/about" as const },
   { label: "What we do", to: "/what-we-do" as const },
+  { label: "Live-in care", to: "/live-in-care" as const },
+  { label: "Training", to: "/training" as const },
   { label: "Careers", to: "/careers" as const },
   { label: "Request care", to: "/request-care" as const },
   { label: "Contact us", to: "/contact" as const },
