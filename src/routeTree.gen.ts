@@ -24,6 +24,7 @@ import { Route as RequestCareRouteImport } from './routes/request-care'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TrainingRouteImport } from './routes/training'
 import { Route as WhatWeDoRouteImport } from './routes/what-we-do'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
@@ -110,6 +111,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrainingRoute = TrainingRouteImport.update({
+  id: '/training',
+  path: '/training',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WhatWeDoRoute = WhatWeDoRouteImport.update({
   id: '/what-we-do',
   path: '/what-we-do',
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/terms': typeof TermsRoute
+  '/training': typeof TrainingRoute
   '/what-we-do': typeof WhatWeDoRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/bookings': typeof AdminBookingsRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/terms': typeof TermsRoute
+  '/training': typeof TrainingRoute
   '/what-we-do': typeof WhatWeDoRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/bookings': typeof AdminBookingsRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
   '/terms': typeof TermsRoute
+  '/training': typeof TrainingRoute
   '/what-we-do': typeof WhatWeDoRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/bookings': typeof AdminBookingsRoute
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/terms'
+    | '/training'
     | '/what-we-do'
     | '/admin/applications'
     | '/admin/bookings'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/terms'
+    | '/training'
     | '/what-we-do'
     | '/admin/applications'
     | '/admin/bookings'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-in'
     | '/terms'
+    | '/training'
     | '/what-we-do'
     | '/admin/applications'
     | '/admin/bookings'
@@ -339,6 +351,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
   TermsRoute: typeof TermsRoute
+  TrainingRoute: typeof TrainingRoute
   WhatWeDoRoute: typeof WhatWeDoRoute
 }
 
@@ -447,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/training': {
+      id: '/training'
+      path: '/training'
+      fullPath: '/training'
+      preLoaderRoute: typeof TrainingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/what-we-do': {
@@ -572,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
   TermsRoute: TermsRoute,
+  TrainingRoute: TrainingRoute,
   WhatWeDoRoute: WhatWeDoRoute,
 }
 export const routeTree = rootRouteImport

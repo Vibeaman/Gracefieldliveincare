@@ -12,7 +12,7 @@ let serviceClient: SupabaseClient | undefined;
 
 /**
  * Service-role client for admin writes. Bypasses RLS.
- * Never import this file from a route or component — only from *.functions.ts.
+ * Never import this file from a route or component, only from *.functions.ts.
  */
 export function getServiceSupabase(): SupabaseClient {
   if (!serviceClient) {

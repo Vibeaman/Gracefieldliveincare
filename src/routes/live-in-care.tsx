@@ -41,7 +41,7 @@ function LiveInCarePage() {
                 "Light housework, laundry, shopping and a comfortable home",
                 "Company, hobbies and help staying in touch with family",
                 "Support getting to appointments and keeping simple paperwork tidy",
-                "Overnight presence — waking nights or sleeping nearby",
+                "Overnight presence: waking nights or sleeping nearby",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-4 text-lg text-foreground/85">
                   <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="h-4 w-4" aria-hidden="true" /></span>

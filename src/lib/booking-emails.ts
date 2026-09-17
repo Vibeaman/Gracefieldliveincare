@@ -17,7 +17,7 @@ function emailForStatus(status: BookingStatus, firstName: string): StatusEmail |
   if (status === "assigned") {
     return {
       subject: "A carer has been assigned to your care request",
-      text: `Hello ${name},\n\nGood news — a carer has been assigned to your care request. Log in to see their details.\n\n${accountLink}\n\nWith care,\nGracefield Living in Care`,
+      text: `Hello ${name},\n\nGood news: a carer has been assigned to your care request. Log in to see their details.\n\n${accountLink}\n\nWith care,\nGracefield Living in Care`,
     };
   }
 

@@ -73,7 +73,7 @@ function Index() {
               Live-in help for the whole day, not a flying visit.
             </h2>
             <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
-              A Gracefield carer lives in the home, so support is there for getting up, meals, company and a settled night — shaped around the person, not a clock-in slot.
+              A Gracefield carer lives in the home, so support is there for getting up, meals, company and a settled night, shaped around the person, not a clock-in slot.
             </p>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -111,7 +111,7 @@ function Index() {
               {
                 icon: Moon,
                 title: "Nights",
-                text: "Someone in the house overnight — awake if that is needed, or sleeping nearby and ready if called.",
+                text: "Someone in the house overnight, awake if that is needed, or sleeping nearby and ready if called.",
               },
               {
                 icon: House,

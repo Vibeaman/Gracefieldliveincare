@@ -27,7 +27,7 @@ const services = [
   },
   {
     title: "Meals at home",
-    lead: "Familiar food, cooked in their own kitchen — not a tray from elsewhere.",
+    lead: "Familiar food, cooked in their own kitchen, not a tray from elsewhere.",
     points: [
       "Breakfast, lunch, tea and a light supper if that is the routine",
       "Meals shaped around likes, dislikes and any special diet",
@@ -61,7 +61,7 @@ const services = [
     lead: "Someone in the house who has time to talk, listen and share the day.",
     points: [
       "Conversation, favourite programmes and reading together",
-      "Hobbies at home — puzzles, crafts, music, a walk in the garden",
+      "Hobbies at home: puzzles, crafts, music, a walk in the garden",
       "Help staying in touch with neighbours, friends and family",
       "Company on a trip out when that feels right",
     ],
@@ -115,7 +115,7 @@ function WhatWeDoPage() {
       >
         <p>
           A Gracefield carer lives in the home. Support is there for getting up, meals, company and a
-          settled night — shaped around the person, not a clock-in slot.
+          settled night, shaped around the person, not a clock-in slot.
         </p>
       </PageIntro>
       <div className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 sm:pb-20 lg:px-12">

@@ -480,11 +480,11 @@ function LeaveReview({
           defaultValue="5"
           className="mt-2 h-13 w-full rounded-xl border border-input bg-background px-4 text-base"
         >
-          <option value="5">5 — Excellent</option>
-          <option value="4">4 — Good</option>
-          <option value="3">3 — Okay</option>
-          <option value="2">2 — Not great</option>
-          <option value="1">1 — Poor</option>
+          <option value="5">5, Excellent</option>
+          <option value="4">4, Good</option>
+          <option value="3">3, Okay</option>
+          <option value="2">2, Not great</option>
+          <option value="1">1, Poor</option>
         </select>
       </div>
       <div>

@@ -9,7 +9,7 @@ import { getAdminPasscode, isAdminUnlocked, lockAdmin, unlockAdmin } from "@/lib
 import { listAdminBookings } from "@/lib/admin.functions";
 
 /**
- * TEMPORARY GATE — NOT REAL SECURITY.
+ * TEMPORARY GATE. NOT REAL SECURITY.
  *
  * The passcode is checked again on the server for every admin write. The screen
  * itself is still only a keep-out sign. Swap for Supabase role-based auth later.

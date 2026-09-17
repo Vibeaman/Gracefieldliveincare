@@ -66,4 +66,9 @@ export const PAGE_SEO = {
     title: "Your Work | Gracefield Living in Care",
     description: "See your assigned families and your documents.",
   },
+  training: {
+    title: "Training and Cleaning | Gracefield Living in Care",
+    description:
+      "Care Certificate induction, specialist carer training, and extra help with deep cleaning or decluttering at home.",
+  },
 } satisfies Record<string, PageSeo>;
