@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ExternalLink, Mail, MapPin, Menu, Phone, X } from "lucide-react";
+import { ArrowRight, ChevronRight, ExternalLink, Mail, MapPin, Menu, Phone, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -155,46 +155,87 @@ export function SiteHeader() {
   );
 }
 
+const footerMenu = [
+  { label: "Home", to: "/" as const },
+  { label: "About us", to: "/about" as const },
+  { label: "What we do", to: "/live-in-care" as const },
+  { label: "Careers", to: "/careers" as const },
+  { label: "Request care", to: "/request-care" as const },
+  { label: "Contact us", to: "/contact" as const },
+  { label: "Privacy policy", to: "/privacy" as const },
+  { label: "Terms", to: "/terms" as const },
+];
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-secondary/45">
-      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-12">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-12">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3 lg:gap-16">
           <div>
             <Wordmark />
-            <p className="mt-4 max-w-sm text-base text-muted-foreground">
-              Thoughtful live-in care, helping people stay safely in the home they love.
+            <p className="mt-5 max-w-sm text-base leading-relaxed text-muted-foreground">
+              Gracefield Living in Care helps older people stay safely in the home they love, with a carefully chosen live-in carer by their side.
             </p>
           </div>
-          <div className="space-y-4">
-            <h2 className="font-heading text-base font-extrabold text-primary">Contact us</h2>
-            <div className="space-y-3 text-base text-muted-foreground">
-              <a href="tel:+447584920625" className="flex items-center gap-3 hover:text-primary"><Phone className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" /><span>+44 7584 920625</span></a>
-              <a href="mailto:gracefieldliveincare@gmail.com" className="flex items-center gap-3 hover:text-primary"><Mail className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" /><span>gracefieldliveincare@gmail.com</span></a>
-              <div className="flex items-start gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" /><div className="not-italic"><p className="not-italic">11 Blue Close, Workington, CA14 3FJ</p><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1"><a className="inline-flex items-center gap-1.5 hover:text-primary" href="https://www.google.com/maps/search/?api=1&query=11+Blue+Close%2C+Workington%2C+CA14+3FJ" target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" aria-hidden="true" /> Google Maps</a><a className="inline-flex items-center gap-1.5 hover:text-primary" href="https://maps.apple.com/?q=11+Blue+Close%2C+Workington%2C+CA14+3FJ" target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" aria-hidden="true" /> Apple Maps</a></div></div></div>
+
+          <div>
+            <h2 className="font-heading text-xl font-extrabold text-primary">Contact us</h2>
+            <div className="mt-5 space-y-4 text-base text-muted-foreground">
+              <a href="tel:+447584920625" className="flex items-center gap-3 hover:text-primary">
+                <Phone className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" />
+                <span>+44 7584 920625</span>
+              </a>
+              <a href="mailto:gracefieldliveincare@gmail.com" className="flex items-center gap-3 break-all hover:text-primary">
+                <Mail className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" />
+                <span>gracefieldliveincare@gmail.com</span>
+              </a>
+              <div className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" />
+                <div>
+                  <p>11 Blue Close</p>
+                  <p>Workington, CA14 3FJ</p>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                    <a className="inline-flex items-center gap-1.5 hover:text-primary" href="https://www.google.com/maps/search/?api=1&query=11+Blue+Close%2C+Workington%2C+CA14+3FJ" target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4" aria-hidden="true" /> Google Maps
+                    </a>
+                    <a className="inline-flex items-center gap-1.5 hover:text-primary" href="https://maps.apple.com/?q=11+Blue+Close%2C+Workington%2C+CA14+3FJ" target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4" aria-hidden="true" /> Apple Maps
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="space-y-4 md:col-span-2 lg:col-span-1">
-            <h2 className="font-heading text-base font-extrabold text-primary">Quick links</h2>
-            <nav className="flex flex-wrap gap-x-6 gap-y-3 text-base font-semibold" aria-label="Footer navigation">
-              {navItems.slice(1).map((item) => (
-                <Link key={item.to} to={item.to} className="text-foreground/75 hover:text-primary">
-                  {item.label}
-                </Link>
+
+          <nav aria-label="Quick menu">
+            <h2 className="font-heading text-xl font-extrabold text-primary">Quick menu</h2>
+            <ul className="mt-5 space-y-1">
+              {footerMenu.map((item) => (
+                <li key={item.to}>
+                  {item.to === "/contact" ? (
+                    <Link
+                      to="/contact"
+                      search={{ about: undefined }}
+                      className="flex min-h-11 items-center gap-2 text-base font-semibold text-foreground/80 transition-colors hover:text-primary"
+                    >
+                      <ChevronRight className="h-4 w-4 shrink-0 text-brand-gold" aria-hidden="true" />
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <Link
+                      to={item.to}
+                      className="flex min-h-11 items-center gap-2 text-base font-semibold text-foreground/80 transition-colors hover:text-primary"
+                    >
+                      <ChevronRight className="h-4 w-4 shrink-0 text-brand-gold" aria-hidden="true" />
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
               ))}
-              <Link to="/contact" search={{ about: undefined }} className="text-foreground/75 hover:text-primary">
-                Contact
-              </Link>
-              <Link to="/privacy" className="text-foreground/75 hover:text-primary">
-                Privacy
-              </Link>
-              <Link to="/terms" className="text-foreground/75 hover:text-primary">
-                Terms
-              </Link>
-            </nav>
-          </div>
+            </ul>
+          </nav>
         </div>
-        <p className="mt-10 border-t border-border pt-6 text-sm text-muted-foreground">
+        <p className="mt-12 border-t border-border pt-6 text-sm text-muted-foreground">
           © {new Date().getFullYear()} Gracefield Living in Care. All rights reserved.
         </p>
       </div>
