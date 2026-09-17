@@ -178,8 +178,10 @@ export const deleteAdminCarer = createServerFn({ method: "POST" })
           `Could not delete the work email, so this carer was not removed. ${mailbox.reason}`,
         );
       }
-      if (mailbox.status === "skipped" && mailbox.reason !== "No work email on this carer.") {
-        mailboxNote = mailbox.reason;
+      if (mailbox.status === "skipped") {
+        throw new Error(
+          `Could not delete the work email, so this carer was not removed. ${mailbox.reason}`,
+        );
       }
     }
 
@@ -190,7 +192,9 @@ export const deleteAdminCarer = createServerFn({ method: "POST" })
           userError.message.toLowerCase().includes("not found") ||
           userError.message.toLowerCase().includes("does not exist");
         if (!gone) {
-          mailboxNote = [mailboxNote, userError.message].filter(Boolean).join(" ");
+          throw new Error(
+            `The work email was deleted, but the login could not be removed. ${userError.message}`,
+          );
         }
       }
     }

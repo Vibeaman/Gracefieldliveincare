@@ -142,6 +142,61 @@ export type DeleteMailboxResult =
   | { status: "skipped"; reason: string }
   | { status: "failed"; reason: string };
 
+type ZohoAccount = {
+  primaryEmailAddress?: string;
+  zuid?: number | string;
+};
+
+async function listOrganisationAccounts(
+  token: string,
+  zoid: string,
+): Promise<ZohoAccount[]> {
+  const response = await fetch(`${MAIL_API_URL}/api/organization/${zoid}/accounts`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Zoho-oauthtoken ${token}`,
+    },
+  });
+  const payload = (await response.json().catch(() => ({}))) as {
+    data?: ZohoAccount[] | ZohoAccount;
+    status?: { description?: string };
+  };
+  if (!response.ok) {
+    throw new Error(payload.status?.description || "Could not read Zoho mailboxes.");
+  }
+  if (Array.isArray(payload.data)) return payload.data;
+  if (payload.data) return [payload.data];
+  return [];
+}
+
+function findAccount(accounts: ZohoAccount[], email: string): ZohoAccount | undefined {
+  return accounts.find(
+    (account) => (account.primaryEmailAddress ?? "").trim().toLowerCase() === email,
+  );
+}
+
+async function requestMailboxDelete(
+  token: string,
+  zoid: string,
+  body: Record<string, unknown>,
+): Promise<{ ok: boolean; reason: string }> {
+  const response = await fetch(`${MAIL_API_URL}/api/organization/${zoid}/accounts`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Zoho-oauthtoken ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const payload = (await response.json().catch(() => ({}))) as {
+    status?: { description?: string; code?: number };
+  };
+  const reason = payload.status?.description || `Zoho said no (${response.status}).`;
+  return { ok: response.ok, reason };
+}
+
 export async function deleteCarerMailbox(email: string): Promise<DeleteMailboxResult> {
   const trimmed = email.trim().toLowerCase();
   if (!trimmed) {
@@ -169,25 +224,43 @@ export async function deleteCarerMailbox(email: string): Promise<DeleteMailboxRe
     };
   }
 
-  const response = await fetch(`${MAIL_API_URL}/api/organization/${zoid}/accounts`, {
-    method: "DELETE",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Zoho-oauthtoken ${token}`,
-    },
-    body: JSON.stringify({ emailList: [trimmed] }),
-  });
-  const payload = (await response.json().catch(() => ({}))) as {
-    status?: { description?: string; code?: number };
-  };
-  if (response.ok) {
+  let accounts: ZohoAccount[];
+  try {
+    accounts = await listOrganisationAccounts(token, zoid);
+  } catch (error) {
+    return {
+      status: "failed",
+      reason: error instanceof Error ? error.message : "Could not read Zoho mailboxes.",
+    };
+  }
+
+  const existing = findAccount(accounts, trimmed);
+  if (!existing) {
     return { status: "deleted" };
   }
-  const reason = payload.status?.description || `Zoho said no (${response.status}).`;
-  const lower = reason.toLowerCase();
-  if (lower.includes("not found") || lower.includes("does not exist") || response.status === 404) {
-    return { status: "skipped", reason: "That mailbox was already gone." };
+
+  const first = await requestMailboxDelete(token, zoid, { emailList: [trimmed] });
+  accounts = await listOrganisationAccounts(token, zoid);
+  if (!findAccount(accounts, trimmed)) {
+    return { status: "deleted" };
   }
-  return { status: "failed", reason };
+
+  if (existing.zuid) {
+    const second = await requestMailboxDelete(token, zoid, {
+      accountList: [String(existing.zuid)],
+    });
+    accounts = await listOrganisationAccounts(token, zoid);
+    if (!findAccount(accounts, trimmed)) {
+      return { status: "deleted" };
+    }
+    return {
+      status: "failed",
+      reason: second.reason || first.reason || "Zoho still has that mailbox.",
+    };
+  }
+
+  return {
+    status: "failed",
+    reason: first.reason || "Zoho still has that mailbox.",
+  };
 }
