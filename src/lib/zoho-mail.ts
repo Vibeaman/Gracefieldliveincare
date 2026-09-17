@@ -1,19 +1,23 @@
 const ACCOUNTS_URL = process.env["ZOHO_ACCOUNTS_URL"] ?? "https://accounts.zoho.com";
 const MAIL_API_URL = process.env["ZOHO_MAIL_API_URL"] ?? "https://mail.zoho.com";
 
+function zohoEnv(name: string): string {
+  return (process.env[name] ?? "").trim();
+}
+
 export function isZohoConfigured(): boolean {
   return Boolean(
-    process.env["ZOHO_CLIENT_ID"] &&
-      process.env["ZOHO_CLIENT_SECRET"] &&
-      process.env["ZOHO_REFRESH_TOKEN"] &&
-      process.env["ZOHO_ZOID"],
+    zohoEnv("ZOHO_CLIENT_ID") &&
+      zohoEnv("ZOHO_CLIENT_SECRET") &&
+      zohoEnv("ZOHO_REFRESH_TOKEN") &&
+      zohoEnv("ZOHO_ZOID"),
   );
 }
 
 async function getAccessToken(): Promise<string> {
-  const clientId = process.env["ZOHO_CLIENT_ID"];
-  const clientSecret = process.env["ZOHO_CLIENT_SECRET"];
-  const refreshToken = process.env["ZOHO_REFRESH_TOKEN"];
+  const clientId = zohoEnv("ZOHO_CLIENT_ID");
+  const clientSecret = zohoEnv("ZOHO_CLIENT_SECRET");
+  const refreshToken = zohoEnv("ZOHO_REFRESH_TOKEN");
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error("Zoho is not connected yet.");
   }
@@ -67,7 +71,7 @@ export async function createCarerMailbox(options: {
     };
   }
 
-  const zoid = process.env["ZOHO_ZOID"];
+  const zoid = zohoEnv("ZOHO_ZOID");
   if (!zoid) {
     return { status: "skipped", reason: "Zoho organisation id is missing." };
   }
