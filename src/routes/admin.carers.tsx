@@ -179,11 +179,13 @@ function AdminCarersPage() {
                   </Button>
                   <RemoveCarerButton
                     carerName={carer.name}
+                    hasWorkEmail={Boolean(carer.work_email)}
                     onConfirm={async () => {
-                      await deleteAdminCarer({
+                      const result = await deleteAdminCarer({
                         data: { passcode: getAdminPasscode(), id: carer.id },
                       });
                       setRemoved(carer.name);
+                      if (result.mailboxNote) setError(result.mailboxNote);
                       await load();
                     }}
                   />
@@ -199,12 +201,15 @@ function AdminCarersPage() {
 
 function RemoveCarerButton({
   carerName,
+  hasWorkEmail,
   onConfirm,
 }: {
   carerName: string;
+  hasWorkEmail: boolean;
   onConfirm: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   return (
     <>
@@ -221,23 +226,30 @@ function RemoveCarerButton({
         <AlertDialogContent className="max-w-md rounded-2xl p-7">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-heading text-2xl font-extrabold text-primary">
-              Are you sure?
+              Remove {carerName}?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-lg text-muted-foreground">
-              This will take {carerName} off your list of carers. You can add them again later.
+              {hasWorkEmail
+                ? `This will take ${carerName} off your list, delete their login, and delete their work email so that Zoho seat is free again.`
+                : `This will take ${carerName} off your list and delete their login if they have one.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4 flex-col gap-3 sm:flex-col">
             <AlertDialogAction
               className="h-16 w-full text-lg"
-              onClick={() => {
-                void onConfirm();
-                setOpen(false);
+              disabled={busy}
+              onClick={(event) => {
+                event.preventDefault();
+                setBusy(true);
+                void onConfirm().finally(() => {
+                  setBusy(false);
+                  setOpen(false);
+                });
               }}
             >
-              Yes, remove {carerName}
+              {busy ? "Removing…" : `Yes, remove ${carerName}`}
             </AlertDialogAction>
-            <AlertDialogCancel className="mt-0 h-16 w-full text-lg">
+            <AlertDialogCancel className="mt-0 h-16 w-full text-lg" disabled={busy}>
               No, keep them
             </AlertDialogCancel>
           </AlertDialogFooter>

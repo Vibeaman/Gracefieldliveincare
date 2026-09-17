@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { provisionAcceptedCarer, retryCarerMailbox } from "@/lib/carer-account";
+import { deleteCarerMailbox } from "@/lib/zoho-mail";
 import { sendBookingStatusEmail } from "@/lib/booking-emails";
 import { getServiceSupabase, requireAdminPasscode } from "@/lib/supabase.server";
 import type {
@@ -162,9 +163,41 @@ export const deleteAdminCarer = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     requireAdminPasscode(data.passcode);
     const supabase = getServiceSupabase();
+    const { data: carer, error: loadError } = await supabase
+      .from("carers")
+      .select("id, user_id, work_email")
+      .eq("id", data.id)
+      .single();
+    if (loadError) throw new Error(loadError.message);
+
+    let mailboxNote: string | null = null;
+    if (carer.work_email) {
+      const mailbox = await deleteCarerMailbox(carer.work_email);
+      if (mailbox.status === "failed") {
+        throw new Error(
+          `Could not delete the work email, so this carer was not removed. ${mailbox.reason}`,
+        );
+      }
+      if (mailbox.status === "skipped" && mailbox.reason !== "No work email on this carer.") {
+        mailboxNote = mailbox.reason;
+      }
+    }
+
+    if (carer.user_id) {
+      const { error: userError } = await supabase.auth.admin.deleteUser(carer.user_id);
+      if (userError) {
+        const gone =
+          userError.message.toLowerCase().includes("not found") ||
+          userError.message.toLowerCase().includes("does not exist");
+        if (!gone) {
+          mailboxNote = [mailboxNote, userError.message].filter(Boolean).join(" ");
+        }
+      }
+    }
+
     const { error } = await supabase.from("carers").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
-    return { ok: true as const };
+    return { ok: true as const, mailboxNote };
   });
 
 export const listAdminEnquiries = createServerFn({ method: "POST" })

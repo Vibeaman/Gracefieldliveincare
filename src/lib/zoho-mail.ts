@@ -134,3 +134,60 @@ export async function createCarerMailbox(options: {
 
   return { status: "failed", reason: lastError };
 }
+
+const COMPANY_MAILBOX = "gracefield.liveincare@gracefieldliveincare.com";
+
+export type DeleteMailboxResult =
+  | { status: "deleted" }
+  | { status: "skipped"; reason: string }
+  | { status: "failed"; reason: string };
+
+export async function deleteCarerMailbox(email: string): Promise<DeleteMailboxResult> {
+  const trimmed = email.trim().toLowerCase();
+  if (!trimmed) {
+    return { status: "skipped", reason: "No work email on this carer." };
+  }
+  if (trimmed === COMPANY_MAILBOX) {
+    return { status: "skipped", reason: "The company mailbox is never deleted." };
+  }
+  if (!isZohoConfigured()) {
+    return { status: "skipped", reason: "Zoho is not connected yet." };
+  }
+
+  const zoid = zohoEnv("ZOHO_ZOID");
+  if (!zoid) {
+    return { status: "skipped", reason: "Zoho organisation id is missing." };
+  }
+
+  let token: string;
+  try {
+    token = await getAccessToken();
+  } catch (error) {
+    return {
+      status: "failed",
+      reason: error instanceof Error ? error.message : "Could not sign in to Zoho.",
+    };
+  }
+
+  const response = await fetch(`${MAIL_API_URL}/api/organization/${zoid}/accounts`, {
+    method: "DELETE",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Zoho-oauthtoken ${token}`,
+    },
+    body: JSON.stringify({ emailList: [trimmed] }),
+  });
+  const payload = (await response.json().catch(() => ({}))) as {
+    status?: { description?: string; code?: number };
+  };
+  if (response.ok) {
+    return { status: "deleted" };
+  }
+  const reason = payload.status?.description || `Zoho said no (${response.status}).`;
+  const lower = reason.toLowerCase();
+  if (lower.includes("not found") || lower.includes("does not exist") || response.status === 404) {
+    return { status: "skipped", reason: "That mailbox was already gone." };
+  }
+  return { status: "failed", reason };
+}
