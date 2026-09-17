@@ -130,7 +130,7 @@ function Index() {
           </div>
           <div className="mt-10">
             <Button asChild size="lg" className="w-full sm:w-auto">
-              <Link to="/live-in-care">See how live-in care works</Link>
+              <Link to="/what-we-do">Read more about what we do</Link>
             </Button>
           </div>
         </div>

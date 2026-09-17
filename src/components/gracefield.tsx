@@ -9,6 +9,7 @@ import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 const navItems = [
   { label: "Home", to: "/" as const },
   { label: "About", to: "/about" as const },
+  { label: "What we do", to: "/what-we-do" as const },
   { label: "Live-in Care", to: "/live-in-care" as const },
   { label: "Careers", to: "/careers" as const },
 ];
@@ -158,7 +159,7 @@ export function SiteHeader() {
 const footerMenu = [
   { label: "Home", to: "/" as const },
   { label: "About us", to: "/about" as const },
-  { label: "What we do", to: "/live-in-care" as const },
+  { label: "What we do", to: "/what-we-do" as const },
   { label: "Careers", to: "/careers" as const },
   { label: "Request care", to: "/request-care" as const },
   { label: "Contact us", to: "/contact" as const },

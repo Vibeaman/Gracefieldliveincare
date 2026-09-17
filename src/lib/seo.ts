@@ -19,6 +19,11 @@ export const PAGE_SEO = {
     description:
       "One-to-one live-in support for personal care, meals, medication, daily life and companionship at home.",
   },
+  whatWeDo: {
+    title: "What We Do | Gracefield Living in Care",
+    description:
+      "How Gracefield live-in carers help with personal care, meals, medication, home life, company, appointments and nights.",
+  },
   careers: {
     title: "Live-in Care Jobs | Gracefield Living in Care",
     description:
