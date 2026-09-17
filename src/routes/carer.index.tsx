@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AdminCard, DetailRow, SavedNote, StatusLabel } from "@/components/admin";
 import { PageIntro } from "@/components/gracefield";
 import { isCarerUser, signOut, waitForUser } from "@/lib/auth";
-import { signCarerDocument } from "@/lib/carer.functions";
+import { completeCarerBooking, signCarerDocument } from "@/lib/carer.functions";
 import { documentLabel, DOCUMENT_STATUS_LABELS } from "@/lib/carer-docs";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
@@ -117,19 +117,20 @@ function CarerHomePage() {
   }, []);
 
   const completeBooking = async (id: string) => {
+    const user = await waitForUser();
+    if (!user) return;
     setBusyId(id);
     setError(null);
     setNote(null);
-    const supabase = getSupabase();
-    const { error: updateError } = await supabase.from("bookings").update({ status: "completed" }).eq("id", id);
-    if (updateError) {
-      setError(authErrorMessage(updateError, "We could not mark that as complete."));
+    try {
+      await completeCarerBooking({ data: { userId: user.id, bookingId: id } });
+      setNote("Marked as complete.");
+      await load();
+    } catch (caught) {
+      setError(authErrorMessage(caught, "We could not mark that as complete."));
+    } finally {
       setBusyId(null);
-      return;
     }
-    setNote("Marked as complete.");
-    setBusyId(null);
-    await load();
   };
 
   const openDocument = async (documentId: string) => {

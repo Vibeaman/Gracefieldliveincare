@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageIntro } from "@/components/gracefield";
-import { getSession, updatePassword } from "@/lib/auth";
+import { getSession, isCarerUser, updatePassword } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
 import { authErrorMessage, getSupabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -88,7 +88,10 @@ function ResetPasswordPage() {
       setBusy(false);
       return;
     }
-    await navigate({ to: "/account" });
+    const {
+      data: { user },
+    } = await getSupabase().auth.getUser();
+    await navigate({ to: isCarerUser(user) ? "/carer" : "/account" });
   };
 
   return (

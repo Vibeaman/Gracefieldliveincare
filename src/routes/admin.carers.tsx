@@ -112,7 +112,7 @@ function AdminCarersPage() {
 
       {removed ? (
         <div className="mt-6">
-          <SavedNote>{removed} was removed.</SavedNote>
+          <SavedNote>{removed}</SavedNote>
         </div>
       ) : null}
 
@@ -154,7 +154,7 @@ function AdminCarersPage() {
                             data: { passcode: getAdminPasscode(), carerId: carer.id },
                           });
                           if (result.mailboxStatus === "created") {
-                            setRemoved(null);
+                            setRemoved(`${carer.name}'s work email is ready.`);
                             setError(null);
                           } else {
                             setError(result.mailboxNote ?? "Could not create that work email.");
@@ -181,12 +181,20 @@ function AdminCarersPage() {
                     carerName={carer.name}
                     hasWorkEmail={Boolean(carer.work_email)}
                     onConfirm={async () => {
-                      const result = await deleteAdminCarer({
-                        data: { passcode: getAdminPasscode(), id: carer.id },
-                      });
-                      setRemoved(carer.name);
-                      if (result.mailboxNote) setError(result.mailboxNote);
-                      await load();
+                      try {
+                        await deleteAdminCarer({
+                          data: { passcode: getAdminPasscode(), id: carer.id },
+                        });
+                        setRemoved(`${carer.name} was removed.`);
+                        setError(null);
+                        await load();
+                      } catch (caught) {
+                        setError(
+                          caught instanceof Error
+                            ? caught.message
+                            : "Could not remove that carer.",
+                        );
+                      }
                     }}
                   />
                 </div>

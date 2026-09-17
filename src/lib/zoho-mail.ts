@@ -125,7 +125,7 @@ export async function createCarerMailbox(options: {
     }
     lastError = payload.status?.description || `Zoho said no (${response.status}).`;
     const lower = lastError.toLowerCase();
-    if (lower.includes("exist") || lower.includes("already") || response.status === 400) {
+    if (lower.includes("exist") || lower.includes("already")) {
       taken.add(localPart);
       continue;
     }

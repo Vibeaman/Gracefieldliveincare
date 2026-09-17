@@ -288,6 +288,10 @@ export const decideAdminApplication = createServerFn({ method: "POST" })
       return { ok: true as const, mailboxStatus: "none" as const, mailboxNote: null };
     }
 
+    if (application.status === "accepted") {
+      return { ok: true as const, mailboxStatus: "none" as const, mailboxNote: null };
+    }
+
     const provisioned = await provisionAcceptedCarer(application);
 
     const { error: updateError } = await supabase
