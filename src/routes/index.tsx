@@ -1,6 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { BatteryFull, Check, ChevronRight, HeartHandshake, House, Phone, Signal, Sun, Wifi } from "lucide-react";
+import {
+  Bath,
+  BatteryFull,
+  CalendarDays,
+  Check,
+  ChevronRight,
+  HeartHandshake,
+  House,
+  Moon,
+  Phone,
+  Pill,
+  ShoppingBag,
+  Signal,
+  UtensilsCrossed,
+  Wifi,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/gracefield";
@@ -50,31 +65,73 @@ function Index() {
         </div>
       </section>
 
-      <section className="section-band px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
+      <section id="what-we-do" className="section-band px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
         <div className="mx-auto max-w-7xl">
           <Eyebrow>What we do</Eyebrow>
           <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
             <h2 className="max-w-3xl font-heading text-3xl font-extrabold leading-tight text-primary sm:text-4xl lg:text-5xl">
-              One carer, living alongside them, around the clock.
+              Live-in help for the whole day, not a flying visit.
             </h2>
             <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Familiar routines can continue, with kind, practical help always close by.
+              A Gracefield carer lives in the home, so support is there for getting up, meals, company and a settled night — shaped around the person, not a clock-in slot.
             </p>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {[
-                { icon: Sun, title: "24-hour live-in support", text: "A reassuring presence at home, day and night." },
-                { icon: HeartHandshake, title: "Help with daily living", text: "Personal care, meals, medication and everyday routines." },
-                { icon: House, title: "Staying connected", text: "Support to enjoy family, friends and the local community." },
-              ].map(({ icon: Icon, title, text }) => (
-              <article key={title} className="surface-card rounded-2xl p-7 sm:p-8">
-                <span className="mb-7 grid h-12 w-12 place-items-center rounded-full bg-secondary text-primary">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: Bath,
+                title: "Personal care",
+                text: "Help with washing, dressing, getting ready for bed and the private parts of the day, always with dignity.",
+              },
+              {
+                icon: UtensilsCrossed,
+                title: "Meals at home",
+                text: "Familiar food cooked in their own kitchen, with drinks and snacks through the day.",
+              },
+              {
+                icon: Pill,
+                title: "Medication",
+                text: "Gentle prompts, safe storage and a clear note of what was taken, working with the GP and family.",
+              },
+              {
+                icon: ShoppingBag,
+                title: "Home and daily life",
+                text: "Light housework, laundry, shopping and keeping the house comfortable and safe.",
+              },
+              {
+                icon: HeartHandshake,
+                title: "Company",
+                text: "Conversation, favourite programmes, hobbies and time outdoors, so the days do not feel empty.",
+              },
+              {
+                icon: CalendarDays,
+                title: "Appointments and family",
+                text: "Help getting to appointments, staying in touch, and keeping simple paperwork in order.",
+              },
+              {
+                icon: Moon,
+                title: "Nights",
+                text: "Someone in the house overnight — awake if that is needed, or sleeping nearby and ready if called.",
+              },
+              {
+                icon: House,
+                title: "After illness",
+                text: "Steady support after a hospital stay or a difficult patch, at the person’s own pace.",
+              },
+            ].map(({ icon: Icon, title, text }) => (
+              <article key={title} className="surface-card rounded-2xl p-6 sm:p-7">
+                <span className="mb-6 grid h-12 w-12 place-items-center rounded-full bg-secondary text-primary">
                   <Icon className="h-6 w-6" aria-hidden="true" />
                 </span>
-                <h3 className="font-heading text-xl font-extrabold text-primary sm:text-2xl">{title}</h3>
+                <h3 className="font-heading text-xl font-extrabold text-primary">{title}</h3>
                 <p className="mt-3 text-base leading-relaxed text-muted-foreground">{text}</p>
               </article>
             ))}
+          </div>
+          <div className="mt-10">
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <Link to="/live-in-care">See how live-in care works</Link>
+            </Button>
           </div>
         </div>
       </section>

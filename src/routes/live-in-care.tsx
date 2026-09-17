@@ -34,11 +34,14 @@ function LiveInCarePage() {
             <h2 className="font-heading text-3xl font-extrabold text-primary sm:text-4xl">What live-in care with Gracefield provides</h2>
             <ul className="mt-8 space-y-5">
               {[
-                "A dedicated carer living in the home day and night",
-                "Support with personal care, washing and dressing",
-                "Medication support and gentle prompts",
-                "Help with meals and daily activities around the home",
-                "Companionship and support to stay connected",
+                "A dedicated carer living in the home, day and night",
+                "Personal care: washing, dressing, getting ready for bed",
+                "Meals cooked at home, drinks and help at the table if needed",
+                "Medication prompts, safe storage and a simple daily record",
+                "Light housework, laundry, shopping and a comfortable home",
+                "Company, hobbies and help staying in touch with family",
+                "Support getting to appointments and keeping simple paperwork tidy",
+                "Overnight presence — waking nights or sleeping nearby",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-4 text-lg text-foreground/85">
                   <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="h-4 w-4" aria-hidden="true" /></span>
