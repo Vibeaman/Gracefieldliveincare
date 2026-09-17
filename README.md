@@ -24,11 +24,16 @@ Admin screens: [http://localhost:3000/admin](http://localhost:3000/admin). Defau
    - `https://YOUR_PROJECT.supabase.co/auth/v1/callback`
    Under **Authentication → URL configuration**, set the Site URL to `https://www.gracefieldliveincare.com` and add Redirect URLs:
    - `https://www.gracefieldliveincare.com/account`
+   - `https://www.gracefieldliveincare.com/carer`
    - `https://www.gracefieldliveincare.com/reset-password`
    - `https://gracefieldliveincare.com/account`
+   - `https://gracefieldliveincare.com/carer`
    - `https://gracefieldliveincare.com/reset-password`
    Password reset emails are sent by Supabase (not Resend).
-3. Open **SQL Editor**, paste `supabase/schema.sql`, and run it. That creates tables, Row Level Security, the new-user trigger, and a public `photos` storage bucket. If the rest of the schema is already live, run `supabase/enquiries.sql` once so contact-form messages are stored. If leaving a review fails, run `supabase/reviews-policy.sql` once.
+3. Open **SQL Editor**, paste `supabase/schema.sql`, and run it. That creates tables, Row Level Security, the new-user trigger, a public `photos` bucket, and a private `carer-documents` bucket. If the rest of the schema is already live, run these extra files as needed:
+   - `supabase/enquiries.sql` — contact-form messages
+   - `supabase/carer-accounts.sql` — carer logins, private documents, and extra admin views
+   - `supabase/reviews-policy.sql` — if leaving a review fails
 4. Copy the project URL, anon key, and service role key from **Project Settings → API** into `.env.local` and into Vercel.
 
 ## Deploy to Vercel
@@ -47,6 +52,7 @@ The repo is already set up for Vercel (Nitro plugin + `vercel.json` framework pr
    - `RESEND_FROM_EMAIL` (optional; defaults to Resend's test sender until a domain is verified)
    - `CONTACT_TO_EMAIL` (optional; defaults to gracefieldliveincare@gmail.com)
    - `SITE_URL` (optional; defaults to https://www.gracefieldliveincare.com)
+   - `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN`, `ZOHO_ZOID` (optional until work emails are wired)
 4. Deploy.
 
 After the first deploy, every push to `main` ships a new production build. If you change environment variables later, trigger a new deploy so the running app picks them up.
@@ -58,8 +64,12 @@ Live paths:
 - Forgot / reset password: `/forgot-password`, `/reset-password`
 - Care request (after sign in): `/request-care`
 - Client account: `/account`
+- Carer sign in / work: `/carer/login`, `/carer`
 - Admin: `/admin` (not linked from the public nav)
 - Admin enquiries: `/admin/enquiries`
+- Admin families / search: `/admin/families`, `/admin/search`
+
+Carers cannot create their own account. They apply on `/careers`. Accepting an application creates their login and emails the password. Work mailboxes (`firstname@gracefieldliveincare.com`) are created at the same time once Zoho is connected.
 
 The admin passcode is checked on the server for every admin write. It is still a keep-out sign for the page itself, not a full role system.
 

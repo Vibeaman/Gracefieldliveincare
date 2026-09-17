@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarCheck, FileText, Mail, Users } from "lucide-react";
+import { CalendarCheck, FileText, Home, Mail, Search, Users } from "lucide-react";
 
 import { AdminScreen, BigActionCard } from "@/components/admin";
 
@@ -15,6 +15,12 @@ function AdminHomePage() {
     <AdminScreen title="Welcome back." instruction="Tap one of the boxes below to get started.">
       <div className="grid gap-5 sm:gap-6">
         <BigActionCard
+          to="/admin/applications"
+          title="Applications"
+          description="People waiting to work with you. Accepting creates their login."
+          icon={FileText}
+        />
+        <BigActionCard
           to="/admin/bookings"
           title="Bookings"
           description="See who has asked for care and choose a carer."
@@ -27,10 +33,16 @@ function AdminHomePage() {
           icon={Users}
         />
         <BigActionCard
-          to="/admin/applications"
-          title="Applications"
-          description="Read people who want to work with you."
-          icon={FileText}
+          to="/admin/families"
+          title="Families"
+          description="See who has signed up to ask for care."
+          icon={Home}
+        />
+        <BigActionCard
+          to="/admin/search"
+          title="Find someone"
+          description="Search carers and bookings by name."
+          icon={Search}
         />
         <BigActionCard
           to="/admin/enquiries"

@@ -7,11 +7,11 @@ import { Label } from "@/components/ui/label";
 import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
 import { HoneypotFields } from "@/components/honeypot-fields";
 import { PageIntro } from "@/components/gracefield";
-import { ensureClientProfile, signInWithEmail } from "@/lib/auth";
+import { ensureClientProfile, isCarerUser, signInWithEmail } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
 import { isLikelySpam } from "@/lib/spam-guard";
-import { authErrorMessage } from "@/lib/supabase";
+import { authErrorMessage, getSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/sign-in")({
   head: () => ({
@@ -40,6 +40,13 @@ function SignInPage() {
     if (authError) {
       setError(authErrorMessage(authError, "That email or password did not work. Please try again."));
       setBusy(false);
+      return;
+    }
+    const {
+      data: { user },
+    } = await getSupabase().auth.getUser();
+    if (isCarerUser(user)) {
+      await navigate({ to: "/carer" });
       return;
     }
     await ensureClientProfile();
@@ -85,6 +92,9 @@ function SignInPage() {
             </form>
             <p className="mt-6 text-base text-muted-foreground">
               New to Gracefield? <Link to="/create-account" className="font-bold text-primary underline decoration-brand-gold underline-offset-4">Create an account</Link>
+            </p>
+            <p className="mt-3 text-base text-muted-foreground">
+              Are you a carer? <Link to="/carer/login" className="font-bold text-primary underline decoration-brand-gold underline-offset-4">Carer sign in</Link>
             </p>
           </div>
         </div>

@@ -58,4 +58,12 @@ export const PAGE_SEO = {
     title: "Choose a New Password | Gracefield Living in Care",
     description: "Choose a new password for your Gracefield account.",
   },
+  carerLogin: {
+    title: "Carer Sign In | Gracefield Living in Care",
+    description: "Sign in to see the families you are looking after.",
+  },
+  carerHome: {
+    title: "Your Work | Gracefield Living in Care",
+    description: "See your assigned families and your documents.",
+  },
 } satisfies Record<string, PageSeo>;

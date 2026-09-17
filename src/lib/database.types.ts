@@ -1,6 +1,9 @@
 export type BookingStatus = "pending" | "assigned" | "active" | "completed";
 export type ApplicationStatus = "pending" | "accepted" | "declined";
 export type EnquirySubject = "care" | "referral" | "careers";
+export type DocumentType = "id" | "proof_of_address" | "reference" | "certificate" | "dbs";
+export type DocumentStatus = "uploaded" | "reviewed" | "verified";
+export type MailboxStatus = "none" | "skipped" | "created" | "failed";
 
 export type Client = {
   id: string;
@@ -12,10 +15,26 @@ export type Client = {
 
 export type Carer = {
   id: string;
+  user_id: string | null;
+  application_id: string | null;
   name: string;
   bio: string;
   photo_url: string;
   specialty: string;
+  work_email: string | null;
+  mailbox_status: MailboxStatus;
+  created_at: string;
+};
+
+export type ApplicationDocument = {
+  id: string;
+  application_id: string;
+  carer_id: string | null;
+  doc_type: DocumentType;
+  file_name: string;
+  storage_path: string;
+  content_type: string;
+  status: DocumentStatus;
   created_at: string;
 };
 
@@ -30,6 +49,26 @@ export type Application = {
   photo_url: string;
   status: ApplicationStatus;
   created_at: string;
+  documents: ApplicationDocument[];
+};
+
+export type AdminClient = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  created_at: string;
+  has_booking: boolean;
+};
+
+export type CarerBooking = {
+  id: string;
+  care_type: string;
+  location: string;
+  start_date: string;
+  hours: string;
+  status: BookingStatus;
+  client_name: string;
 };
 
 export type Booking = {

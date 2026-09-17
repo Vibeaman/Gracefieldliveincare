@@ -16,10 +16,14 @@ create table if not exists public.clients (
 
 create table if not exists public.carers (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid unique references auth.users (id) on delete set null,
   name text not null,
   bio text not null default '',
   photo_url text not null default '',
   specialty text not null default '',
+  work_email text,
+  mailbox_status text not null default 'none'
+    check (mailbox_status in ('none', 'skipped', 'created', 'failed')),
   created_at timestamptz not null default now()
 );
 
@@ -36,6 +40,9 @@ create table if not exists public.applications (
     check (status in ('pending', 'accepted', 'declined')),
   created_at timestamptz not null default now()
 );
+
+alter table public.carers
+  add column if not exists application_id uuid unique references public.applications (id) on delete set null;
 
 create table if not exists public.bookings (
   id uuid primary key default gen_random_uuid(),
@@ -71,6 +78,21 @@ create table if not exists public.enquiries (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.application_documents (
+  id uuid primary key default gen_random_uuid(),
+  application_id uuid not null references public.applications (id) on delete cascade,
+  carer_id uuid references public.carers (id) on delete set null,
+  doc_type text not null
+    check (doc_type in ('id', 'proof_of_address', 'reference', 'certificate', 'dbs')),
+  file_name text not null,
+  storage_path text not null,
+  content_type text not null default '',
+  status text not null default 'uploaded'
+    check (status in ('uploaded', 'reviewed', 'verified')),
+  created_at timestamptz not null default now(),
+  unique (application_id, doc_type)
+);
+
 -- ---------------------------------------------------------------------------
 -- New-user trigger: every auth user gets a clients row
 -- ---------------------------------------------------------------------------
@@ -82,6 +104,10 @@ security definer
 set search_path = public
 as $$
 begin
+  if coalesce(new.raw_app_meta_data ->> 'role', '') = 'carer' then
+    return new;
+  end if;
+
   insert into public.clients (id, full_name)
   values (
     new.id,
@@ -111,6 +137,7 @@ alter table public.applications enable row level security;
 alter table public.bookings enable row level security;
 alter table public.reviews enable row level security;
 alter table public.enquiries enable row level security;
+alter table public.application_documents enable row level security;
 
 -- clients: a person can only see and update their own row
 drop policy if exists "clients_select_own" on public.clients;
@@ -178,13 +205,20 @@ create policy "reviews_insert_own_completed"
     )
   );
 
--- carers: anyone can read (clients need the assigned carer's name). Writes are
--- admin-only via the service role, which bypasses RLS.
+-- carers: a family can read the carer assigned to them; a carer can read
+-- their own row. Writes are admin-only via the service role.
 drop policy if exists "carers_public_read" on public.carers;
 create policy "carers_public_read"
   on public.carers for select
-  to anon, authenticated
-  using (true);
+  to authenticated
+  using (
+    user_id = auth.uid()
+    or exists (
+      select 1 from public.bookings b
+      where b.assigned_carer_id = carers.id
+        and b.client_id = auth.uid()
+    )
+  );
 
 -- applications: anyone can apply. Reads and updates are admin-only (service role).
 drop policy if exists "applications_public_insert" on public.applications;
@@ -217,4 +251,87 @@ create policy "photos_public_insert_applications"
   with check (
     bucket_id = 'photos'
     and (storage.foldername(name))[1] = 'applications'
+  );
+
+drop policy if exists "application_documents_public_insert" on public.application_documents;
+create policy "application_documents_public_insert"
+  on public.application_documents for insert
+  to anon, authenticated
+  with check (status = 'uploaded');
+
+drop policy if exists "application_documents_carer_select" on public.application_documents;
+create policy "application_documents_carer_select"
+  on public.application_documents for select
+  to authenticated
+  using (
+    carer_id in (select id from public.carers where user_id = auth.uid())
+    or application_id in (
+      select application_id from public.carers
+      where user_id = auth.uid() and application_id is not null
+    )
+  );
+
+drop policy if exists "bookings_select_assigned_carer" on public.bookings;
+create policy "bookings_select_assigned_carer"
+  on public.bookings for select
+  to authenticated
+  using (
+    assigned_carer_id in (select id from public.carers where user_id = auth.uid())
+  );
+
+drop policy if exists "bookings_complete_assigned_carer" on public.bookings;
+create policy "bookings_complete_assigned_carer"
+  on public.bookings for update
+  to authenticated
+  using (
+    assigned_carer_id in (select id from public.carers where user_id = auth.uid())
+    and status in ('assigned', 'active')
+  )
+  with check (
+    assigned_carer_id in (select id from public.carers where user_id = auth.uid())
+    and status = 'completed'
+  );
+
+drop policy if exists "clients_select_for_assigned_booking" on public.clients;
+create policy "clients_select_for_assigned_booking"
+  on public.clients for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from public.bookings b
+      join public.carers c on c.id = b.assigned_carer_id
+      where b.client_id = clients.id
+        and c.user_id = auth.uid()
+    )
+  );
+
+insert into storage.buckets (id, name, public)
+values ('carer-documents', 'carer-documents', false)
+on conflict (id) do nothing;
+
+drop policy if exists "carer_docs_insert_applications" on storage.objects;
+create policy "carer_docs_insert_applications"
+  on storage.objects for insert
+  to anon, authenticated
+  with check (
+    bucket_id = 'carer-documents'
+    and (storage.foldername(name))[1] = 'applications'
+  );
+
+drop policy if exists "carer_docs_select_own" on storage.objects;
+create policy "carer_docs_select_own"
+  on storage.objects for select
+  to authenticated
+  using (
+    bucket_id = 'carer-documents'
+    and exists (
+      select 1
+      from public.application_documents d
+      join public.carers c
+        on c.id = d.carer_id
+        or c.application_id = d.application_id
+      where c.user_id = auth.uid()
+        and d.storage_path = name
+    )
   );

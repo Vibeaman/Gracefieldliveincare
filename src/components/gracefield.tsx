@@ -3,7 +3,7 @@ import { ArrowRight, ChevronRight, ExternalLink, Mail, MapPin, Menu, Phone, X } 
 import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { getUser } from "@/lib/auth";
+import { getUser, isCarerUser } from "@/lib/auth";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 
 const navItems = [
@@ -30,12 +30,17 @@ export function Wordmark() {
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [carer, setCarer] = useState(false);
 
   useEffect(() => {
-    void getUser().then((user) => setSignedIn(Boolean(user)));
+    void getUser().then((user) => {
+      setSignedIn(Boolean(user));
+      setCarer(isCarerUser(user));
+    });
     if (!isSupabaseConfigured()) return;
     const { data } = getSupabase().auth.onAuthStateChange((_event, session) => {
       setSignedIn(Boolean(session?.user));
+      setCarer(isCarerUser(session?.user));
     });
     return () => data.subscription.unsubscribe();
   }, []);
@@ -61,7 +66,7 @@ export function SiteHeader() {
           ))}
           {signedIn ? (
             <Button asChild variant="outline" size="default" className="h-11 px-5">
-              <Link to="/account">Your account</Link>
+              <Link to={carer ? "/carer" : "/account"}>{carer ? "Your work" : "Your account"}</Link>
             </Button>
           ) : (
             <>
@@ -117,12 +122,12 @@ export function SiteHeader() {
             ))}
             {signedIn ? (
               <Link
-                to="/account"
+                to={carer ? "/carer" : "/account"}
                 className="rounded-lg px-3 py-3 text-lg font-semibold text-foreground/80 hover:bg-secondary"
                 activeProps={{ className: "bg-secondary text-primary" }}
                 onClick={() => setOpen(false)}
               >
-                Your account
+                {carer ? "Your work" : "Your account"}
               </Link>
             ) : (
               <>

@@ -16,8 +16,11 @@ import {
   decideAdminApplication,
   deleteAdminApplication,
   listAdminApplications,
+  signAdminDocument,
+  updateAdminDocumentStatus,
 } from "@/lib/admin.functions";
-import { APPLICATION_STATUS_LABELS, formatDate, type Application } from "@/lib/database.types";
+import { DOCUMENT_STATUS_LABELS, DOCUMENT_STATUS_ORDER, documentLabel } from "@/lib/carer-docs";
+import { APPLICATION_STATUS_LABELS, formatDate, type Application, type DocumentStatus } from "@/lib/database.types";
 
 export const Route = createFileRoute("/admin/applications")({
   head: () => ({
@@ -34,6 +37,7 @@ function AdminApplicationsPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"waiting" | "all">("waiting");
 
   const load = async () => {
     try {
@@ -51,6 +55,8 @@ function AdminApplicationsPage() {
     void load();
   }, []);
 
+  const waiting = applications.filter((application) => application.status === "pending");
+  const shown = filter === "waiting" ? waiting : applications;
   const open = applications.find((application) => application.id === openId) ?? null;
 
   if (open) {
@@ -68,17 +74,37 @@ function AdminApplicationsPage() {
   return (
     <AdminScreen
       title="Applications"
-      instruction="Tap a name to read their application."
+      instruction="People waiting to work with you are at the top. Tap a name to read, check papers, then accept or say not right now."
       back={{ label: "Back to home", to: "/admin" }}
     >
       {error ? <p role="alert" className="mb-6 text-lg font-bold text-destructive">{error}</p> : null}
+      <div className="mb-6 flex flex-wrap gap-3">
+        <Button
+          type="button"
+          size="lg"
+          variant={filter === "waiting" ? "default" : "outline"}
+          onClick={() => setFilter("waiting")}
+        >
+          Waiting ({waiting.length})
+        </Button>
+        <Button
+          type="button"
+          size="lg"
+          variant={filter === "all" ? "default" : "outline"}
+          onClick={() => setFilter("all")}
+        >
+          Everyone ({applications.length})
+        </Button>
+      </div>
       {loading ? (
         <p className="text-lg text-muted-foreground">Loading…</p>
-      ) : applications.length === 0 ? (
-        <p className="text-lg text-muted-foreground">No applications yet.</p>
+      ) : shown.length === 0 ? (
+        <p className="text-lg text-muted-foreground">
+          {filter === "waiting" ? "No one is waiting." : "No applications yet."}
+        </p>
       ) : (
         <ul className="grid gap-4">
-          {applications.map((application) => (
+          {shown.map((application) => (
             <li key={application.id}>
               <TapRow
                 onClick={() => setOpenId(application.id)}
@@ -94,6 +120,9 @@ function AdminApplicationsPage() {
                   </span>
                   <span className="mt-1 block text-sm font-bold text-primary">
                     {APPLICATION_STATUS_LABELS[application.status]}
+                    {application.documents.length
+                      ? ` · ${application.documents.length} document${application.documents.length === 1 ? "" : "s"}`
+                      : ""}
                   </span>
                 </span>
               </TapRow>
@@ -119,15 +148,20 @@ function ApplicationDetail({
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mailboxNote, setMailboxNote] = useState<string | null>(null);
+  const [documents, setDocuments] = useState(application.documents);
 
   const choose = async (next: "accepted" | "declined") => {
     setBusy(true);
     setError(null);
     try {
-      await decideAdminApplication({
+      const result = await decideAdminApplication({
         data: { passcode: getAdminPasscode(), id: application.id, decision: next },
       });
       setDecision(next);
+      if (next === "accepted" && result.mailboxNote) {
+        setMailboxNote(result.mailboxNote);
+      }
       await onChanged();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not save that choice.");
@@ -136,10 +170,34 @@ function ApplicationDetail({
     }
   };
 
+  const openDocument = async (documentId: string) => {
+    try {
+      const signed = await signAdminDocument({
+        data: { passcode: getAdminPasscode(), documentId },
+      });
+      window.open(signed.url, "_blank", "noopener,noreferrer");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not open that document.");
+    }
+  };
+
+  const setDocumentStatus = async (documentId: string, status: DocumentStatus) => {
+    try {
+      await updateAdminDocumentStatus({
+        data: { passcode: getAdminPasscode(), documentId, status },
+      });
+      setDocuments((current) =>
+        current.map((document) => (document.id === documentId ? { ...document, status } : document)),
+      );
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not update that document.");
+    }
+  };
+
   return (
     <AdminScreen
       title={application.full_name}
-      instruction="Read their application, then choose below."
+      instruction="Read their application and papers, then choose below. Accepting also creates their login."
       back={{ label: "Back to applications", onClick: onBack }}
     >
       <div className="grid gap-6">
@@ -170,6 +228,40 @@ function ApplicationDetail({
           </div>
         </AdminCard>
 
+        <AdminCard>
+          <h2 className="font-heading text-2xl font-extrabold text-primary">Documents</h2>
+          {documents.length === 0 ? (
+            <p className="mt-4 text-lg text-muted-foreground">No documents uploaded.</p>
+          ) : (
+            <ul className="mt-5 grid gap-4">
+              {documents.map((document) => (
+                <li key={document.id} className="rounded-xl border border-border p-4">
+                  <p className="font-heading text-lg font-extrabold text-primary">
+                    {documentLabel(document.doc_type)}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">{document.file_name}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {DOCUMENT_STATUS_ORDER.map((status) => (
+                      <Button
+                        key={status}
+                        type="button"
+                        size="sm"
+                        variant={document.status === status ? "default" : "outline"}
+                        onClick={() => void setDocumentStatus(document.id, status)}
+                      >
+                        {DOCUMENT_STATUS_LABELS[status]}
+                      </Button>
+                    ))}
+                    <Button type="button" size="sm" variant="outline" onClick={() => void openDocument(document.id)}>
+                      Open
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </AdminCard>
+
         {decision === null ? (
           <AdminCard className="grid gap-4">
             {error ? <p role="alert" className="text-lg font-bold text-destructive">{error}</p> : null}
@@ -180,7 +272,7 @@ function ApplicationDetail({
               disabled={busy}
               onClick={() => void choose("accepted")}
             >
-              Accept
+              {busy ? "Saving…" : "Accept and create their login"}
             </Button>
             <Button
               type="button"
@@ -197,9 +289,15 @@ function ApplicationDetail({
           <AdminCard className="grid gap-4">
             <SavedNote>
               {decision === "accepted"
-                ? `You accepted ${application.full_name}. They have been added to your carers.`
+                ? `You accepted ${application.full_name}. Their login has been emailed to them.`
                 : `You chose not right now for ${application.full_name}. Nothing has been sent to them.`}
             </SavedNote>
+            {mailboxNote ? (
+              <p className="text-base text-muted-foreground">
+                Work email was not created automatically: {mailboxNote} You can try again from Carers, or make the mailbox by hand.
+              </p>
+            ) : null}
+            {error ? <p role="alert" className="text-lg font-bold text-destructive">{error}</p> : null}
           </AdminCard>
         )}
 

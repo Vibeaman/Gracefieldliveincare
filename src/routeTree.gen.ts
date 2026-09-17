@@ -11,20 +11,29 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CareersRouteImport } from './routes/careers'
+import { Route as CarerRouteImport } from './routes/carer'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CreateAccountRouteImport } from './routes/create-account'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LiveInCareRouteImport } from './routes/live-in-care'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RequestCareRouteImport } from './routes/request-care'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WhatWeDoRouteImport } from './routes/what-we-do'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminApplicationsRouteImport } from './routes/admin.applications'
 import { Route as AdminBookingsRouteImport } from './routes/admin.bookings'
 import { Route as AdminCarersRouteImport } from './routes/admin.carers'
+import { Route as AdminEnquiriesRouteImport } from './routes/admin.enquiries'
+import { Route as AdminFamiliesRouteImport } from './routes/admin.families'
+import { Route as AdminSearchRouteImport } from './routes/admin.search'
+import { Route as CarerIndexRouteImport } from './routes/carer.index'
+import { Route as CarerLoginRouteImport } from './routes/carer.login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,16 +43,6 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -61,6 +60,11 @@ const CareersRoute = CareersRouteImport.update({
   path: '/careers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CarerRoute = CarerRouteImport.update({
+  id: '/carer',
+  path: '/carer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -71,9 +75,19 @@ const CreateAccountRoute = CreateAccountRouteImport.update({
   path: '/create-account',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LiveInCareRoute = LiveInCareRouteImport.update({
   id: '/live-in-care',
   path: '/live-in-care',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RequestCareRoute = RequestCareRouteImport.update({
@@ -81,9 +95,24 @@ const RequestCareRoute = RequestCareRouteImport.update({
   path: '/request-care',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhatWeDoRoute = WhatWeDoRouteImport.update({
+  id: '/what-we-do',
+  path: '/what-we-do',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -106,130 +135,211 @@ const AdminCarersRoute = AdminCarersRouteImport.update({
   path: '/carers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminEnquiriesRoute = AdminEnquiriesRouteImport.update({
+  id: '/enquiries',
+  path: '/enquiries',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFamiliesRoute = AdminFamiliesRouteImport.update({
+  id: '/families',
+  path: '/families',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSearchRoute = AdminSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AdminRoute,
+} as any)
+const CarerIndexRoute = CarerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CarerRoute,
+} as any)
+const CarerLoginRoute = CarerLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => CarerRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/privacy': typeof PrivacyRoute
-  '/terms': typeof TermsRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/careers': typeof CareersRoute
+  '/carer': typeof CarerRouteWithChildren
   '/contact': typeof ContactRoute
   '/create-account': typeof CreateAccountRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/live-in-care': typeof LiveInCareRoute
+  '/privacy': typeof PrivacyRoute
   '/request-care': typeof RequestCareRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/terms': typeof TermsRoute
+  '/what-we-do': typeof WhatWeDoRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/carers': typeof AdminCarersRoute
+  '/admin/enquiries': typeof AdminEnquiriesRoute
+  '/admin/families': typeof AdminFamiliesRoute
+  '/admin/search': typeof AdminSearchRoute
+  '/carer/login': typeof CarerLoginRoute
   '/admin/': typeof AdminIndexRoute
+  '/carer/': typeof CarerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/privacy': typeof PrivacyRoute
-  '/terms': typeof TermsRoute
   '/account': typeof AccountRoute
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/create-account': typeof CreateAccountRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/live-in-care': typeof LiveInCareRoute
+  '/privacy': typeof PrivacyRoute
   '/request-care': typeof RequestCareRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/terms': typeof TermsRoute
+  '/what-we-do': typeof WhatWeDoRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/carers': typeof AdminCarersRoute
+  '/admin/enquiries': typeof AdminEnquiriesRoute
+  '/admin/families': typeof AdminFamiliesRoute
+  '/admin/search': typeof AdminSearchRoute
+  '/carer/login': typeof CarerLoginRoute
   '/admin': typeof AdminIndexRoute
+  '/carer': typeof CarerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/privacy': typeof PrivacyRoute
-  '/terms': typeof TermsRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/careers': typeof CareersRoute
+  '/carer': typeof CarerRouteWithChildren
   '/contact': typeof ContactRoute
   '/create-account': typeof CreateAccountRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/live-in-care': typeof LiveInCareRoute
+  '/privacy': typeof PrivacyRoute
   '/request-care': typeof RequestCareRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/terms': typeof TermsRoute
+  '/what-we-do': typeof WhatWeDoRoute
   '/admin/applications': typeof AdminApplicationsRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/carers': typeof AdminCarersRoute
+  '/admin/enquiries': typeof AdminEnquiriesRoute
+  '/admin/families': typeof AdminFamiliesRoute
+  '/admin/search': typeof AdminSearchRoute
+  '/carer/login': typeof CarerLoginRoute
   '/admin/': typeof AdminIndexRoute
+  '/carer/': typeof CarerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
-    | '/privacy'
-    | '/terms'
     | '/account'
     | '/admin'
     | '/careers'
+    | '/carer'
     | '/contact'
     | '/create-account'
+    | '/forgot-password'
     | '/live-in-care'
+    | '/privacy'
     | '/request-care'
+    | '/reset-password'
     | '/sign-in'
+    | '/terms'
+    | '/what-we-do'
     | '/admin/applications'
     | '/admin/bookings'
     | '/admin/carers'
+    | '/admin/enquiries'
+    | '/admin/families'
+    | '/admin/search'
+    | '/carer/login'
     | '/admin/'
+    | '/carer/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/privacy'
-    | '/terms'
     | '/account'
     | '/careers'
     | '/contact'
     | '/create-account'
+    | '/forgot-password'
     | '/live-in-care'
+    | '/privacy'
     | '/request-care'
+    | '/reset-password'
     | '/sign-in'
+    | '/terms'
+    | '/what-we-do'
     | '/admin/applications'
     | '/admin/bookings'
     | '/admin/carers'
+    | '/admin/enquiries'
+    | '/admin/families'
+    | '/admin/search'
+    | '/carer/login'
     | '/admin'
+    | '/carer'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/privacy'
-    | '/terms'
     | '/account'
     | '/admin'
     | '/careers'
+    | '/carer'
     | '/contact'
     | '/create-account'
+    | '/forgot-password'
     | '/live-in-care'
+    | '/privacy'
     | '/request-care'
+    | '/reset-password'
     | '/sign-in'
+    | '/terms'
+    | '/what-we-do'
     | '/admin/applications'
     | '/admin/bookings'
     | '/admin/carers'
+    | '/admin/enquiries'
+    | '/admin/families'
+    | '/admin/search'
+    | '/carer/login'
     | '/admin/'
+    | '/carer/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  PrivacyRoute: typeof PrivacyRoute
-  TermsRoute: typeof TermsRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   CareersRoute: typeof CareersRoute
+  CarerRoute: typeof CarerRouteWithChildren
   ContactRoute: typeof ContactRoute
   CreateAccountRoute: typeof CreateAccountRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LiveInCareRoute: typeof LiveInCareRoute
+  PrivacyRoute: typeof PrivacyRoute
   RequestCareRoute: typeof RequestCareRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
+  TermsRoute: typeof TermsRoute
+  WhatWeDoRoute: typeof WhatWeDoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -246,20 +356,6 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -283,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CareersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/carer': {
+      id: '/carer'
+      path: '/carer'
+      fullPath: '/carer'
+      preLoaderRoute: typeof CarerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -297,11 +400,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreateAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/live-in-care': {
       id: '/live-in-care'
       path: '/live-in-care'
       fullPath: '/live-in-care'
       preLoaderRoute: typeof LiveInCareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/request-care': {
@@ -311,11 +428,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RequestCareRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/what-we-do': {
+      id: '/what-we-do'
+      path: '/what-we-do'
+      fullPath: '/what-we-do'
+      preLoaderRoute: typeof WhatWeDoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -346,6 +484,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCarersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/enquiries': {
+      id: '/admin/enquiries'
+      path: '/enquiries'
+      fullPath: '/admin/enquiries'
+      preLoaderRoute: typeof AdminEnquiriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/families': {
+      id: '/admin/families'
+      path: '/families'
+      fullPath: '/admin/families'
+      preLoaderRoute: typeof AdminFamiliesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/search': {
+      id: '/admin/search'
+      path: '/search'
+      fullPath: '/admin/search'
+      preLoaderRoute: typeof AdminSearchRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/carer/': {
+      id: '/carer/'
+      path: '/'
+      fullPath: '/carer/'
+      preLoaderRoute: typeof CarerIndexRouteImport
+      parentRoute: typeof CarerRoute
+    }
+    '/carer/login': {
+      id: '/carer/login'
+      path: '/login'
+      fullPath: '/carer/login'
+      preLoaderRoute: typeof CarerLoginRouteImport
+      parentRoute: typeof CarerRoute
+    }
   }
 }
 
@@ -353,6 +526,9 @@ interface AdminRouteChildren {
   AdminApplicationsRoute: typeof AdminApplicationsRoute
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminCarersRoute: typeof AdminCarersRoute
+  AdminEnquiriesRoute: typeof AdminEnquiriesRoute
+  AdminFamiliesRoute: typeof AdminFamiliesRoute
+  AdminSearchRoute: typeof AdminSearchRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -360,24 +536,43 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminApplicationsRoute: AdminApplicationsRoute,
   AdminBookingsRoute: AdminBookingsRoute,
   AdminCarersRoute: AdminCarersRoute,
+  AdminEnquiriesRoute: AdminEnquiriesRoute,
+  AdminFamiliesRoute: AdminFamiliesRoute,
+  AdminSearchRoute: AdminSearchRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface CarerRouteChildren {
+  CarerLoginRoute: typeof CarerLoginRoute
+  CarerIndexRoute: typeof CarerIndexRoute
+}
+
+const CarerRouteChildren: CarerRouteChildren = {
+  CarerLoginRoute: CarerLoginRoute,
+  CarerIndexRoute: CarerIndexRoute,
+}
+
+const CarerRouteWithChildren = CarerRoute._addFileChildren(CarerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  PrivacyRoute: PrivacyRoute,
-  TermsRoute: TermsRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   CareersRoute: CareersRoute,
+  CarerRoute: CarerRouteWithChildren,
   ContactRoute: ContactRoute,
   CreateAccountRoute: CreateAccountRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LiveInCareRoute: LiveInCareRoute,
+  PrivacyRoute: PrivacyRoute,
   RequestCareRoute: RequestCareRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
+  TermsRoute: TermsRoute,
+  WhatWeDoRoute: WhatWeDoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

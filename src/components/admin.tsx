@@ -30,7 +30,14 @@ export function AdminScreen({
   instruction: string;
   back?: {
     label: string;
-    to?: "/admin" | "/admin/bookings" | "/admin/carers" | "/admin/applications" | "/admin/enquiries";
+    to?:
+      | "/admin"
+      | "/admin/bookings"
+      | "/admin/carers"
+      | "/admin/applications"
+      | "/admin/enquiries"
+      | "/admin/search"
+      | "/admin/families";
     onClick?: () => void;
   };
   children: ReactNode;
@@ -69,7 +76,13 @@ export function BigActionCard({
   description,
   icon: Icon,
 }: {
-  to: "/admin/bookings" | "/admin/carers" | "/admin/applications" | "/admin/enquiries";
+  to:
+    | "/admin/bookings"
+    | "/admin/carers"
+    | "/admin/applications"
+    | "/admin/enquiries"
+    | "/admin/search"
+    | "/admin/families";
   title: string;
   description: string;
   icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;

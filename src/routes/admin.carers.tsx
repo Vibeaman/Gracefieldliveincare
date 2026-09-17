@@ -26,6 +26,7 @@ import { getAdminPasscode } from "@/lib/admin-session";
 import {
   deleteAdminCarer,
   listAdminCarers,
+  retryAdminMailbox,
   saveAdminCarer,
   uploadAdminPhoto,
 } from "@/lib/admin.functions";
@@ -133,9 +134,40 @@ function AdminCarersPage() {
                     <p className="mt-1 text-base text-muted-foreground sm:text-lg">
                       {carer.specialty}
                     </p>
+                    {carer.work_email ? (
+                      <p className="mt-1 text-sm text-muted-foreground">{carer.work_email}</p>
+                    ) : carer.mailbox_status === "failed" || carer.mailbox_status === "skipped" ? (
+                      <p className="mt-1 text-sm text-muted-foreground">Work email not set up yet</p>
+                    ) : null}
                   </div>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row">
+                  {carer.user_id && carer.mailbox_status !== "created" ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="h-14 w-full text-lg sm:w-auto"
+                      onClick={async () => {
+                        try {
+                          const result = await retryAdminMailbox({
+                            data: { passcode: getAdminPasscode(), carerId: carer.id },
+                          });
+                          if (result.mailboxStatus === "created") {
+                            setRemoved(null);
+                            setError(null);
+                          } else {
+                            setError(result.mailboxNote ?? "Could not create that work email.");
+                          }
+                          await load();
+                        } catch (caught) {
+                          setError(caught instanceof Error ? caught.message : "Could not create that work email.");
+                        }
+                      }}
+                    >
+                      Try work email again
+                    </Button>
+                  ) : null}
                   <Button
                     type="button"
                     variant="outline"

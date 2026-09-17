@@ -164,6 +164,28 @@ export async function saveClientDetails(details: {
   if (error) throw error;
 }
 
+export function isCarerUser(user: User | null | undefined): boolean {
+  const role = user?.app_metadata?.["role"];
+  return role === "carer";
+}
+
+export async function uploadPrivateDocument(
+  applicationId: string,
+  docType: string,
+  file: File,
+): Promise<string> {
+  const supabase = getSupabase();
+  const extension = file.name.split(".").pop()?.toLowerCase() || "pdf";
+  const path = `applications/${applicationId}/${docType}.${extension}`;
+  const { error } = await supabase.storage.from("carer-documents").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || "application/pdf",
+  });
+  if (error) throw error;
+  return path;
+}
+
 export async function uploadPublicPhoto(folder: "applications" | "carers", file: File) {
   const supabase = getSupabase();
   const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";

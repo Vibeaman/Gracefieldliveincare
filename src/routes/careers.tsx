@@ -10,11 +10,13 @@ import { HoneypotFields } from "@/components/honeypot-fields";
 import { Eyebrow, PageIntro } from "@/components/gracefield";
 import careKitchen from "@/assets/gracefield-care-kitchen.jpg";
 import { notifyNewApplication } from "@/lib/application.functions";
-import { uploadPublicPhoto } from "@/lib/auth";
+import { uploadPrivateDocument, uploadPublicPhoto } from "@/lib/auth";
+import { DOCUMENT_TYPES, isAllowedDocument } from "@/lib/carer-docs";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
 import { isLikelySpam } from "@/lib/spam-guard";
 import { authErrorMessage, getSupabase } from "@/lib/supabase";
+import type { DocumentType } from "@/lib/database.types";
 
 const CAREERS_WHATSAPP_DISPLAY = "+44 7584 920625";
 const CAREERS_WHATSAPP_LINK = "https://wa.me/447584920625";
@@ -37,8 +39,12 @@ function CareersPage() {
   const [photoName, setPhotoName] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [documents, setDocuments] = useState<Partial<Record<DocumentType, File>>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const requiredDocs: DocumentType[] = ["id", "proof_of_address", "reference"];
+  const documentsReady = requiredDocs.every((type) => Boolean(documents[type]));
 
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
@@ -48,9 +54,29 @@ function CareersPage() {
     setPhotoPreview(file ? URL.createObjectURL(file) : null);
   };
 
+  const handleDocumentChange = (docType: DocumentType, event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    if (!file) {
+      setDocuments((current) => {
+        const next = { ...current };
+        delete next[docType];
+        return next;
+      });
+      return;
+    }
+    const problem = isAllowedDocument(file);
+    if (problem) {
+      setError(problem);
+      event.target.value = "";
+      return;
+    }
+    setError(null);
+    setDocuments((current) => ({ ...current, [docType]: file }));
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!photoFile) return;
+    if (!photoFile || !documentsReady) return;
     const form = new FormData(event.currentTarget);
     if (isLikelySpam(form)) {
       setSubmitted(true);
@@ -60,7 +86,9 @@ function CareersPage() {
     setError(null);
     try {
       const photoUrl = await uploadPublicPhoto("applications", photoFile);
+      const applicationId = crypto.randomUUID();
       const { error: insertError } = await getSupabase().from("applications").insert({
+        id: applicationId,
         full_name: String(form.get("applicant-name") ?? ""),
         email: String(form.get("applicant-email") ?? ""),
         phone: String(form.get("applicant-phone") ?? ""),
@@ -71,6 +99,20 @@ function CareersPage() {
         status: "pending",
       });
       if (insertError) throw insertError;
+
+      for (const [docType, file] of Object.entries(documents)) {
+        if (!file) continue;
+        const storagePath = await uploadPrivateDocument(applicationId, docType, file);
+        const { error: documentError } = await getSupabase().from("application_documents").insert({
+          application_id: applicationId,
+          doc_type: docType,
+          file_name: file.name,
+          storage_path: storagePath,
+          content_type: file.type || "",
+          status: "uploaded",
+        });
+        if (documentError) throw documentError;
+      }
       const fullName = String(form.get("applicant-name") ?? "");
       const email = String(form.get("applicant-email") ?? "");
       const phone = String(form.get("applicant-phone") ?? "");
@@ -132,7 +174,7 @@ function CareersPage() {
               ) : (
                 <>
                   <h3 className="font-heading text-2xl font-extrabold text-primary sm:text-3xl">Apply to be a live-in carer</h3>
-                  <p className="mt-3 text-base text-muted-foreground">Every field is needed so we can get a clear picture of you.</p>
+                  <p className="mt-3 text-base text-muted-foreground">Every field is needed so we can get a clear picture of you. If we have already accepted you, <a href="/carer/login" className="font-bold text-primary underline decoration-brand-gold underline-offset-4">sign in here</a>.</p>
                   <form className="relative mt-7 space-y-5" onSubmit={handleSubmit}>
                     <HoneypotFields />
                     <div>
@@ -192,11 +234,57 @@ function CareersPage() {
                         ) : null}
                       </div>
                     </div>
+                    <div className="space-y-5">
+                      <div>
+                        <p className="text-base font-bold">Your documents</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          PDF, JPG or PNG, up to 10MB each. Photo ID, proof of address and a reference letter are needed. The others help if you have them.
+                        </p>
+                      </div>
+                      {DOCUMENT_TYPES.map((doc) => {
+                        const required = requiredDocs.includes(doc.value);
+                        const chosen = documents[doc.value];
+                        return (
+                          <div key={doc.value}>
+                            <Label htmlFor={`applicant-doc-${doc.value}`} className="text-base font-bold">
+                              {doc.label}
+                              {required ? "" : " (if you have one)"}
+                            </Label>
+                            <p className="mt-1 text-sm text-muted-foreground">{doc.hint}</p>
+                            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                              <label
+                                htmlFor={`applicant-doc-${doc.value}`}
+                                className="inline-flex min-h-13 cursor-pointer items-center gap-2 rounded-xl border border-input bg-background px-4 text-base font-bold text-primary hover:bg-secondary"
+                              >
+                                <Upload className="h-5 w-5" aria-hidden="true" />
+                                {chosen ? "Choose a different file" : "Choose a file"}
+                              </label>
+                              <Input
+                                id={`applicant-doc-${doc.value}`}
+                                name={`applicant-doc-${doc.value}`}
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                                required={required}
+                                className="sr-only"
+                                onChange={(event) => handleDocumentChange(doc.value, event)}
+                              />
+                              {chosen ? (
+                                <span className="max-w-[16rem] truncate text-sm text-muted-foreground">{chosen.name}</span>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                     {error ? <p role="alert" className="text-base font-bold text-destructive">{error}</p> : null}
-                    <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={!photoName || busy}>
+                    <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={!photoName || !documentsReady || busy}>
                       {busy ? "Sending…" : "Submit application"}
                     </Button>
-                    {!photoName ? <p className="text-sm text-muted-foreground">Add your photo to finish your application.</p> : null}
+                    {!photoName || !documentsReady ? (
+                      <p className="text-sm text-muted-foreground">
+                        Add your photo, photo ID, proof of address and a reference letter to finish.
+                      </p>
+                    ) : null}
                   </form>
                 </>
               )}
