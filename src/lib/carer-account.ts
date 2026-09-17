@@ -14,6 +14,22 @@ export function randomPassword(): string {
   return `Gracefield-${randomBytes(8).toString("hex")}A1`;
 }
 
+function mailboxHowTo(workEmail: string, password: string): string[] {
+  return [
+    "This is a real work mailbox, not just a login. You can send and receive email from it.",
+    "",
+    "How to open your mailbox:",
+    "1. Go to https://mail.zoho.com",
+    "2. Sign in with this work email and the same password:",
+    `   ${workEmail}`,
+    `   ${password}`,
+    "3. If Zoho asks you to change the password, skip that and keep this one. It does not change.",
+    "4. Your inbox is then ready. Use it for Gracefield work mail only.",
+    "",
+    "On a phone, you can also download the Zoho Mail app and sign in with the same details.",
+  ];
+}
+
 type ProvisionResult = {
   carerId: string;
   workEmail: string | null;
@@ -182,13 +198,14 @@ export async function provisionAcceptedCarer(application: {
 
   if (workEmail && mailboxStatus === "created") {
     lines.push(
-      "Use your Gracefield work email to sign in. The same details open your work mailbox.",
+      "Use your Gracefield work email to sign in to the website. The same details open your real work mailbox.",
       "",
       `Work email: ${workEmail}`,
       `Password: ${password}`,
       "",
       "Keep these details safe. This password does not change, and it is the only way to sign in.",
-      "Open your work mailbox at https://mail.zoho.com",
+      "",
+      ...mailboxHowTo(workEmail, password),
     );
   } else {
     lines.push(
@@ -281,15 +298,17 @@ export async function retryCarerMailbox(carerId: string): Promise<{
       text: [
         `Hello ${carer.name.split(" ")[0] || carer.name},`,
         "",
-        "Your Gracefield work email is ready. Use it to sign in and to open your mailbox.",
+        "Your Gracefield work email is ready. This is a real mailbox. Use the same details to sign in to the website and to open your inbox.",
         "",
         `Work email: ${mailbox.email}`,
         `Password: ${password}`,
         "",
         "Keep these details safe. This password does not change.",
-        "Sign in at:",
+        "",
+        "Sign in to your work here:",
         `${SITE_URL}/carer/login`,
-        "Open your mailbox at https://mail.zoho.com",
+        "",
+        ...mailboxHowTo(mailbox.email, password),
         "",
         "With thanks,",
         "Gracefield Living in Care",

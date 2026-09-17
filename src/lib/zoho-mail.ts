@@ -112,7 +112,7 @@ export async function createCarerMailbox(options: {
         firstName,
         lastName,
         displayName: options.fullName,
-        oneTimePassword: true,
+        oneTimePassword: false,
         role: "member",
       }),
     });
