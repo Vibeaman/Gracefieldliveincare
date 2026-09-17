@@ -51,18 +51,6 @@ create policy "application_documents_public_insert"
   to anon, authenticated
   with check (status = 'uploaded');
 
-drop policy if exists "application_documents_carer_select" on public.application_documents;
-create policy "application_documents_carer_select"
-  on public.application_documents for select
-  to authenticated
-  using (
-    carer_id in (select id from public.carers where user_id = auth.uid())
-    or application_id in (
-      select application_id from public.carers
-      where user_id = auth.uid() and application_id is not null
-    )
-  );
-
 -- ---------------------------------------------------------------------------
 -- New-user trigger: carer accounts must not get a family (clients) row
 -- ---------------------------------------------------------------------------
@@ -96,24 +84,65 @@ $$;
 -- Bookings / clients: a signed-in carer can see their own assigned work
 -- ---------------------------------------------------------------------------
 
+create or replace function public.current_carer_id()
+returns uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select id from public.carers where user_id = auth.uid() limit 1;
+$$;
+
+create or replace function public.client_is_assigned_carer(p_carer_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.bookings
+    where assigned_carer_id = p_carer_id
+      and client_id = auth.uid()
+  );
+$$;
+
+revoke all on function public.current_carer_id() from public;
+revoke all on function public.client_is_assigned_carer(uuid) from public;
+grant execute on function public.current_carer_id() to authenticated;
+grant execute on function public.client_is_assigned_carer(uuid) to authenticated;
+
+drop policy if exists "application_documents_carer_select" on public.application_documents;
+create policy "application_documents_carer_select"
+  on public.application_documents for select
+  to authenticated
+  using (
+    carer_id = public.current_carer_id()
+    or application_id in (
+      select application_id from public.carers
+      where id = public.current_carer_id()
+        and application_id is not null
+    )
+  );
+
 drop policy if exists "bookings_select_assigned_carer" on public.bookings;
 create policy "bookings_select_assigned_carer"
   on public.bookings for select
   to authenticated
-  using (
-    assigned_carer_id in (select id from public.carers where user_id = auth.uid())
-  );
+  using (assigned_carer_id = public.current_carer_id());
 
 drop policy if exists "bookings_complete_assigned_carer" on public.bookings;
 create policy "bookings_complete_assigned_carer"
   on public.bookings for update
   to authenticated
   using (
-    assigned_carer_id in (select id from public.carers where user_id = auth.uid())
+    assigned_carer_id = public.current_carer_id()
     and status in ('assigned', 'active')
   )
   with check (
-    assigned_carer_id in (select id from public.carers where user_id = auth.uid())
+    assigned_carer_id = public.current_carer_id()
     and status = 'completed'
   );
 
@@ -125,23 +154,19 @@ create policy "clients_select_for_assigned_booking"
     exists (
       select 1
       from public.bookings b
-      join public.carers c on c.id = b.assigned_carer_id
       where b.client_id = clients.id
-        and c.user_id = auth.uid()
+        and b.assigned_carer_id = public.current_carer_id()
     )
   );
 
 drop policy if exists "carers_public_read" on public.carers;
+drop policy if exists "carers_select_own_row" on public.carers;
 create policy "carers_public_read"
   on public.carers for select
   to authenticated
   using (
     user_id = auth.uid()
-    or exists (
-      select 1 from public.bookings b
-      where b.assigned_carer_id = carers.id
-        and b.client_id = auth.uid()
-    )
+    or public.client_is_assigned_carer(id)
   );
 
 -- ---------------------------------------------------------------------------
@@ -170,10 +195,14 @@ create policy "carer_docs_select_own"
     and exists (
       select 1
       from public.application_documents d
-      join public.carers c
-        on c.id = d.carer_id
-        or c.application_id = d.application_id
-      where c.user_id = auth.uid()
-        and d.storage_path = name
+      where d.storage_path = name
+        and (
+          d.carer_id = public.current_carer_id()
+          or d.application_id in (
+            select application_id from public.carers
+            where id = public.current_carer_id()
+              and application_id is not null
+          )
+        )
     )
   );

@@ -60,7 +60,7 @@ export const PAGE_SEO = {
   },
   carerLogin: {
     title: "Carer Sign In | Gracefield Living in Care",
-    description: "Sign in to see the families you are looking after.",
+    description: "Sign in with your Gracefield work email to see the families you are looking after.",
   },
   carerHome: {
     title: "Your Work | Gracefield Living in Care",

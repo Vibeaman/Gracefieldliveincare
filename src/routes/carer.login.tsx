@@ -59,7 +59,7 @@ function CarerLoginPage() {
   return (
     <>
       <PageIntro eyebrow="For carers" title="Sign in to your work.">
-        <p>Use the email and password we sent when we accepted your application.</p>
+        <p>Use your Gracefield work email and the password we sent when we accepted you.</p>
       </PageIntro>
       <section className="section-band px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
         <div className="mx-auto max-w-xl">
@@ -69,29 +69,21 @@ function CarerLoginPage() {
               <HoneypotFields />
               <div>
                 <Label htmlFor="carer-email" className="text-base font-bold">
-                  Email address
+                  Work email
                 </Label>
                 <Input
                   id="carer-email"
                   name="carer-email"
                   type="email"
                   required
-                  autoComplete="email"
+                  autoComplete="username"
                   className="mt-2 h-13 rounded-xl bg-background px-4 text-base"
                 />
               </div>
               <div>
-                <div className="flex items-baseline justify-between gap-3">
-                  <Label htmlFor="carer-password" className="text-base font-bold">
-                    Password
-                  </Label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm font-bold text-primary underline decoration-brand-gold underline-offset-4"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <Label htmlFor="carer-password" className="text-base font-bold">
+                  Password
+                </Label>
                 <Input
                   id="carer-password"
                   name="carer-password"

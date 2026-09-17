@@ -33,6 +33,7 @@ Admin screens: [http://localhost:3000/admin](http://localhost:3000/admin). Defau
 3. Open **SQL Editor**, paste `supabase/schema.sql`, and run it. That creates tables, Row Level Security, the new-user trigger, a public `photos` bucket, and a private `carer-documents` bucket. If the rest of the schema is already live, run these extra files as needed:
    - `supabase/enquiries.sql` — contact-form messages
    - `supabase/carer-accounts.sql` — carer logins, private documents, and extra admin views
+   - `supabase/carer-rls-fix.sql` — if a signed-in carer sees “infinite recursion” on their work page
    - `supabase/reviews-policy.sql` — if leaving a review fails
 4. Copy the project URL, anon key, and service role key from **Project Settings → API** into `.env.local` and into Vercel.
 

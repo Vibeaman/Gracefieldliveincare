@@ -5,7 +5,10 @@ import { getServiceSupabase } from "@/lib/supabase.server";
 import { createCarerMailbox } from "@/lib/zoho-mail";
 import type { MailboxStatus } from "@/lib/database.types";
 
-const SITE_URL = process.env["SITE_URL"] ?? "https://www.gracefieldliveincare.com";
+const SITE_URL = (process.env["SITE_URL"] ?? "https://www.gracefieldliveincare.com").replace(
+  /\/+$/,
+  "",
+);
 
 export function randomPassword(): string {
   return `Gracefield-${randomBytes(8).toString("hex")}A1`;
@@ -17,6 +20,23 @@ type ProvisionResult = {
   mailboxStatus: MailboxStatus;
   mailboxNote: string | null;
 };
+
+async function linkLoginToWorkEmail(options: {
+  userId: string;
+  workEmail: string;
+  password: string;
+  fullName: string;
+}): Promise<void> {
+  const supabase = getServiceSupabase();
+  const { error } = await supabase.auth.admin.updateUserById(options.userId, {
+    email: options.workEmail,
+    password: options.password,
+    email_confirm: true,
+    user_metadata: { full_name: options.fullName },
+    app_metadata: { role: "carer" },
+  });
+  if (error) throw new Error(error.message);
+}
 
 export async function provisionAcceptedCarer(application: {
   id: string;
@@ -58,58 +78,11 @@ export async function provisionAcceptedCarer(application: {
     .update({ carer_id: carerId })
     .eq("application_id", application.id);
 
-  let userId = existingCarer?.user_id as string | null | undefined;
-  let createdLogin = false;
-  if (!userId) {
-    const { data: created, error: createError } = await supabase.auth.admin.createUser({
-      email: application.email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: application.full_name },
-      app_metadata: { role: "carer" },
-    });
-
-    if (createError) {
-      const already =
-        createError.message.toLowerCase().includes("already") ||
-        createError.message.toLowerCase().includes("registered") ||
-        createError.message.toLowerCase().includes("exists");
-      if (!already) throw new Error(createError.message);
-
-      const { data: listed } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
-      const match = listed.users.find(
-        (user) => user.email?.toLowerCase() === application.email.toLowerCase(),
-      );
-      if (!match) {
-        throw new Error(
-          "That email already has an account, but we could not attach it to this carer.",
-        );
-      }
-      await supabase.auth.admin.updateUserById(match.id, {
-        app_metadata: { ...(match.app_metadata ?? {}), role: "carer" },
-        password,
-      });
-      userId = match.id;
-      createdLogin = true;
-    } else {
-      userId = created.user.id;
-      createdLogin = true;
-    }
-
-    const { error: linkError } = await supabase
-      .from("carers")
-      .update({ user_id: userId })
-      .eq("id", carerId);
-    if (linkError) throw new Error(linkError.message);
-  }
-
   let workEmail: string | null = existingCarer?.work_email ?? null;
   let mailboxStatus: MailboxStatus = (existingCarer?.mailbox_status as MailboxStatus) ?? "none";
   let mailboxNote: string | null = null;
 
-  if (mailboxStatus === "created" && workEmail) {
-    mailboxNote = null;
-  } else {
+  if (!(mailboxStatus === "created" && workEmail)) {
     const { data: takenRows } = await supabase
       .from("carers")
       .select("work_email")
@@ -142,6 +115,60 @@ export async function provisionAcceptedCarer(application: {
       .eq("id", carerId);
   }
 
+  const loginEmail = workEmail ?? application.email;
+  let userId = existingCarer?.user_id as string | null | undefined;
+
+  if (!userId) {
+    const { data: created, error: createError } = await supabase.auth.admin.createUser({
+      email: loginEmail,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: application.full_name },
+      app_metadata: { role: "carer" },
+    });
+
+    if (createError) {
+      const already =
+        createError.message.toLowerCase().includes("already") ||
+        createError.message.toLowerCase().includes("registered") ||
+        createError.message.toLowerCase().includes("exists");
+      if (!already) throw new Error(createError.message);
+
+      const { data: listed } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
+      const match = listed.users.find((user) => {
+        const email = user.email?.toLowerCase() ?? "";
+        return email === loginEmail.toLowerCase() || email === application.email.toLowerCase();
+      });
+      if (!match) {
+        throw new Error(
+          "That email already has an account, but we could not attach it to this carer.",
+        );
+      }
+      await linkLoginToWorkEmail({
+        userId: match.id,
+        workEmail: loginEmail,
+        password,
+        fullName: application.full_name,
+      });
+      userId = match.id;
+    } else {
+      userId = created.user.id;
+    }
+
+    const { error: linkError } = await supabase
+      .from("carers")
+      .update({ user_id: userId })
+      .eq("id", carerId);
+    if (linkError) throw new Error(linkError.message);
+  } else if (workEmail) {
+    await linkLoginToWorkEmail({
+      userId,
+      workEmail,
+      password,
+      fullName: application.full_name,
+    });
+  }
+
   const firstName = application.full_name.split(" ")[0] || application.full_name;
   const lines = [
     `Hello ${firstName},`,
@@ -151,25 +178,24 @@ export async function provisionAcceptedCarer(application: {
     "Sign in here to see the families you are looking after:",
     `${SITE_URL}/carer/login`,
     "",
-    `Email: ${application.email}`,
   ];
 
-  if (createdLogin) {
-    lines.push(`Password: ${password}`, "", "Please change this password after you first sign in.");
-  } else {
-    lines.push("", "Use the password you already have. If you need a new one, tap Forgot password on the sign-in page.");
-  }
-
-  if (mailboxStatus === "created" && workEmail) {
+  if (workEmail && mailboxStatus === "created") {
     lines.push(
+      "Use your Gracefield work email to sign in. The same details open your work mailbox.",
       "",
-      "Your Gracefield work email is also ready:",
-      workEmail,
+      `Work email: ${workEmail}`,
       `Password: ${password}`,
-      "Open it at https://mail.zoho.com",
+      "",
+      "Keep these details safe. This password does not change, and it is the only way to sign in.",
+      "Open your work mailbox at https://mail.zoho.com",
     );
   } else {
     lines.push(
+      `Email: ${loginEmail}`,
+      `Password: ${password}`,
+      "",
+      "Keep these details safe. This password does not change.",
       "",
       "Your work email is being set up. We will send it separately if it is not in this message.",
     );
@@ -183,10 +209,7 @@ export async function provisionAcceptedCarer(application: {
     text: lines.join("\n"),
   });
   if (!emailed) {
-    const extra = createdLogin
-      ? "The login was created, but the welcome email did not send. Ask them to use Forgot password."
-      : "The welcome email did not send.";
-    mailboxNote = [mailboxNote, extra].filter(Boolean).join(" ");
+    mailboxNote = [mailboxNote, "The welcome email did not send."].filter(Boolean).join(" ");
   }
 
   return { carerId, workEmail, mailboxStatus, mailboxNote };
@@ -200,7 +223,7 @@ export async function retryCarerMailbox(carerId: string): Promise<{
   const supabase = getServiceSupabase();
   const { data: carer, error } = await supabase
     .from("carers")
-    .select("id, name, work_email, mailbox_status, user_id")
+    .select("id, name, work_email, mailbox_status, user_id, application_id")
     .eq("id", carerId)
     .single();
   if (error) throw new Error(error.message);
@@ -236,27 +259,42 @@ export async function retryCarerMailbox(carerId: string): Promise<{
       .update({ work_email: mailbox.email, mailbox_status: "created" })
       .eq("id", carerId);
 
-    const { data: user } = await supabase.auth.admin.getUserById(carer.user_id);
-    const to = user.user?.email;
-    if (to) {
-      await sendResendEmail({
-        to,
-        subject: "Your Gracefield work email",
-        text: [
-          `Hello ${carer.name.split(" ")[0] || carer.name},`,
-          "",
-          "Your Gracefield work email is ready:",
-          mailbox.email,
-          `Password: ${password}`,
-          "Open it at https://mail.zoho.com",
-          "",
-          "Your carer login password has not changed.",
-          "",
-          "With thanks,",
-          "Gracefield Living in Care",
-        ].join("\n"),
-      });
+    await linkLoginToWorkEmail({
+      userId: carer.user_id,
+      workEmail: mailbox.email,
+      password,
+      fullName: carer.name,
+    });
+
+    let notifyEmail = mailbox.email;
+    if (carer.application_id) {
+      const { data: application } = await supabase
+        .from("applications")
+        .select("email")
+        .eq("id", carer.application_id)
+        .maybeSingle();
+      if (application?.email) notifyEmail = application.email;
     }
+    await sendResendEmail({
+      to: notifyEmail,
+      subject: "Your Gracefield work email",
+      text: [
+        `Hello ${carer.name.split(" ")[0] || carer.name},`,
+        "",
+        "Your Gracefield work email is ready. Use it to sign in and to open your mailbox.",
+        "",
+        `Work email: ${mailbox.email}`,
+        `Password: ${password}`,
+        "",
+        "Keep these details safe. This password does not change.",
+        "Sign in at:",
+        `${SITE_URL}/carer/login`,
+        "Open your mailbox at https://mail.zoho.com",
+        "",
+        "With thanks,",
+        "Gracefield Living in Care",
+      ].join("\n"),
+    });
 
     return { workEmail: mailbox.email, mailboxStatus: "created", mailboxNote: null };
   }
