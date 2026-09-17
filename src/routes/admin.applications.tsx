@@ -19,7 +19,13 @@ import {
   signAdminDocument,
   updateAdminDocumentStatus,
 } from "@/lib/admin.functions";
-import { DOCUMENT_STATUS_LABELS, DOCUMENT_STATUS_ORDER, documentLabel } from "@/lib/carer-docs";
+import {
+  DOCUMENT_STATUS_LABELS,
+  DOCUMENT_STATUS_ORDER,
+  availabilityLabel,
+  documentLabel,
+  experienceLabel,
+} from "@/lib/carer-docs";
 import { APPLICATION_STATUS_LABELS, formatDate, type Application, type DocumentStatus } from "@/lib/database.types";
 
 export const Route = createFileRoute("/admin/applications")({
@@ -116,7 +122,7 @@ function AdminApplicationsPage() {
                     {application.full_name}
                   </span>
                   <span className="mt-1 block text-base text-muted-foreground sm:text-lg">
-                    Can work: {application.availability}
+                    Can work: {availabilityLabel(application.availability)}
                   </span>
                   <span className="mt-1 block text-sm font-bold text-primary">
                     {APPLICATION_STATUS_LABELS[application.status]}
@@ -222,8 +228,8 @@ function ApplicationDetail({
             <DetailRow label="Name" value={application.full_name} />
             <DetailRow label="Email" value={application.email} />
             <DetailRow label="Phone" value={application.phone} />
-            <DetailRow label="Experience" value={application.years_experience} />
-            <DetailRow label="Availability" value={application.availability} />
+            <DetailRow label="Experience" value={experienceLabel(application.years_experience)} />
+            <DetailRow label="Availability" value={availabilityLabel(application.availability)} />
             <DetailRow label="Their message" value={application.about} />
           </div>
         </AdminCard>

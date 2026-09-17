@@ -44,8 +44,30 @@ export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 export const ALLOWED_DOCUMENT_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 export const ALLOWED_DOCUMENT_EXTENSIONS = ["pdf", "jpg", "jpeg", "png"];
 
+export const EXPERIENCE_LABELS: Record<string, string> = {
+  none: "No experience yet",
+  "under-1": "Less than 1 year",
+  "1-3": "1 to 3 years",
+  "3-5": "3 to 5 years",
+  "5-plus": "More than 5 years",
+};
+
+export const AVAILABILITY_LABELS: Record<string, string> = {
+  "full-time": "Full-time live-in",
+  "part-time": "Part-time",
+  unsure: "Not sure yet",
+};
+
 export function documentLabel(docType: string): string {
   return DOCUMENT_TYPES.find((item) => item.value === docType)?.label ?? docType;
+}
+
+export function experienceLabel(value: string): string {
+  return EXPERIENCE_LABELS[value] ?? value;
+}
+
+export function availabilityLabel(value: string): string {
+  return AVAILABILITY_LABELS[value] ?? value;
 }
 
 export function isAllowedDocument(file: File): string | null {

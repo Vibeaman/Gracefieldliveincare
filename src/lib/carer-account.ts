@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 
+import { experienceLabel } from "@/lib/carer-docs";
 import { sendResendEmail } from "@/lib/mail";
 import { getServiceSupabase } from "@/lib/supabase.server";
 import { createCarerMailbox } from "@/lib/zoho-mail";
@@ -79,7 +80,7 @@ export async function provisionAcceptedCarer(application: {
         name: application.full_name,
         bio: application.about,
         photo_url: application.photo_url,
-        specialty: application.years_experience,
+        specialty: experienceLabel(application.years_experience),
         application_id: application.id,
         mailbox_status: "none",
       })

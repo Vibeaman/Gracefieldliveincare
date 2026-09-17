@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { availabilityLabel, experienceLabel } from "@/lib/carer-docs";
 import { contactToEmail, sendResendEmail } from "@/lib/mail";
 
 const SITE_URL =
@@ -23,8 +24,8 @@ export const notifyNewApplication = createServerFn({ method: "POST" })
       `Name: ${data.fullName}`,
       `Email: ${data.email}`,
       `Phone: ${data.phone || "Not given"}`,
-      `Experience: ${data.yearsExperience || "Not given"}`,
-      `Availability: ${data.availability || "Not given"}`,
+      `Experience: ${experienceLabel(data.yearsExperience) || "Not given"}`,
+      `Availability: ${availabilityLabel(data.availability) || "Not given"}`,
       "",
       `Open applications: ${SITE_URL}/admin/applications`,
     ].join("\n");
