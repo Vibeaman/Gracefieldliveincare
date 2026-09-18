@@ -222,6 +222,10 @@ export function SiteFooter() {
                 <Phone className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" />
                 <span>+44 7584 920625</span>
               </a>
+              <a href="mailto:gracefield.liveincare@gracefieldliveincare.com" className="flex items-center gap-3 break-all hover:text-primary">
+                <Mail className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" />
+                <span>gracefield.liveincare@gracefieldliveincare.com</span>
+              </a>
               <a href="mailto:gracefieldliveincare@gmail.com" className="flex items-center gap-3 break-all hover:text-primary">
                 <Mail className="h-5 w-5 shrink-0 text-brand-gold" aria-hidden="true" />
                 <span>gracefieldliveincare@gmail.com</span>

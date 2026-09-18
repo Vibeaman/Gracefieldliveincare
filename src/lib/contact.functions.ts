@@ -41,7 +41,7 @@ export const sendContactMessage = createServerFn({ method: "POST" })
     });
     if (saveError) {
       console.error("Contact enquiry save failed:", saveError.message);
-      throw new Error("We could not send that message. Please email gracefieldliveincare@gmail.com or call us.");
+      throw new Error("We could not send that message. Please email gracefield.liveincare@gracefieldliveincare.com or call us.");
     }
 
     const topic = SUBJECT_LABELS[data.subject];

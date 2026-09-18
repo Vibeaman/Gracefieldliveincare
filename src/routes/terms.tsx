@@ -94,6 +94,13 @@ function TermsPage() {
               Questions about these terms:{" "}
               <a
                 className="font-bold text-primary underline decoration-brand-gold underline-offset-4"
+                href="mailto:gracefield.liveincare@gracefieldliveincare.com"
+              >
+                gracefield.liveincare@gracefieldliveincare.com
+              </a>
+              {" "}or{" "}
+              <a
+                className="font-bold text-primary underline decoration-brand-gold underline-offset-4"
                 href="mailto:gracefieldliveincare@gmail.com"
               >
                 gracefieldliveincare@gmail.com
