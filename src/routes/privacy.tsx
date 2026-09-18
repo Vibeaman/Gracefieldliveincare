@@ -7,7 +7,7 @@ export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: pageMeta(
       "Privacy Policy | Gracefield Living in Care",
-      "How Gracefield Living in Care collects, uses and looks after your personal information.",
+      "How Gracefield Living in Care collects, uses, shares and protects personal information.",
       { path: "/privacy" },
     ),
   }),
@@ -19,16 +19,18 @@ function PrivacyPage() {
     <>
       <PageIntro eyebrow="Privacy" title="Privacy policy">
         <p>
-          This page explains what personal information we collect, why we use it, and the rights you
-          have. Last updated 16 September 2026.
+          This policy explains what personal information we collect, why we use it, who may process
+          it for us, and the rights you have. Last updated 18 September 2026.
         </p>
       </PageIntro>
+
       <section className="px-5 pb-20 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-3xl space-y-10 text-lg leading-relaxed text-muted-foreground">
           <section>
             <h2 className="font-heading text-2xl font-extrabold text-primary">Who we are</h2>
             <p className="mt-3">
-              Gracefield Living in Care, 11 Blue Close, Workington, CA14 3FJ. Email{" "}
+              Gracefield Living in Care is responsible for the personal information described in
+              this policy. Our address is 11 Blue Close, Workington, CA14 3FJ. Email{" "}
               <a
                 className="font-bold text-primary underline decoration-brand-gold underline-offset-4"
                 href="mailto:gracefieldliveincare@gmail.com"
@@ -47,59 +49,147 @@ function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="font-heading text-2xl font-extrabold text-primary">What we collect</h2>
+            <h2 className="font-heading text-2xl font-extrabold text-primary">Information we collect</h2>
             <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>Account details: name, email, phone number and optional address.</li>
-              <li>Care requests: the type of care, location, start date and hours of support.</li>
-              <li>Carer applications: name, email, phone, experience, availability, a short message and a photo.</li>
-              <li>Reviews you choose to leave after a care period ends.</li>
-              <li>Technical details needed to run the site, such as a signed-in session.</li>
+              <li>
+                Contact and account details, including your name, email address, phone number,
+                address, sign-in details and account identifier.
+              </li>
+              <li>
+                Enquiries sent through our contact form, including the subject and message you send
+                us.
+              </li>
+              <li>
+                Care requests and bookings, including care type, location, preferred start date,
+                hours, booking status, assigned carer and any review you choose to leave.
+              </li>
+              <li>
+                Carer applications, including name, contact details, experience, availability,
+                personal statement and photograph.
+              </li>
+              <li>
+                Application and employment-related documents you upload, such as photo ID, proof of
+                address, references, training certificates and DBS documents.
+              </li>
+              <li>
+                Carer work-account information, including a Gracefield work email address, account
+                status, assigned bookings and documents connected to the carer profile.
+              </li>
+              <li>
+                Administrative records, such as application decisions, document-review status,
+                booking updates and records of communications sent through the service.
+              </li>
+              <li>
+                Technical information needed to keep the website secure and working, such as session
+                data, cookie choices, browser information and basic error or security logs.
+              </li>
             </ul>
-          </section>
-
-          <section>
-            <h2 className="font-heading text-2xl font-extrabold text-primary">How we use it</h2>
-            <p className="mt-3">
-              We use this information to create your account, handle care requests, review carer
-              applications, assign a carer, and keep you updated about your request. We do not sell
-              your information.
+            <p className="mt-4">
+              Please only give us information that is relevant. Care enquiries may sometimes include
+              health or other sensitive information. We use this only where necessary to discuss,
+              arrange or provide suitable care and where data-protection law allows us to do so.
             </p>
           </section>
 
           <section>
-            <h2 className="font-heading text-2xl font-extrabold text-primary">Who we share it with</h2>
+            <h2 className="font-heading text-2xl font-extrabold text-primary">How we collect it</h2>
             <p className="mt-3">
-              We use trusted services to run the website: hosting (Vercel), database and sign-in
-              (Supabase), and email (Resend, when status emails are turned on). Google is used only
-              if you choose “Continue with Google”. They only receive what they need to provide that
-              service.
+              We collect information directly from you when you create an account, sign in, contact
+              us, request care, apply to work with us, upload documents or use your family or carer
+              account. We may also receive information from someone acting for a person who needs
+              care, from a referee, or from a sign-in provider if you choose that option.
             </p>
           </section>
 
           <section>
-            <h2 className="font-heading text-2xl font-extrabold text-primary">Cookies</h2>
-            <p className="mt-3">
-              We use cookies and similar storage so you can stay signed in and so the site works. We
-              do not use advertising cookies. You can accept this or choose “Only what's needed” on
-              the cookie banner. Signing in still needs a small amount of storage on your device.
+            <h2 className="font-heading text-2xl font-extrabold text-primary">How and why we use it</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
+              <li>To respond to enquiries about care, referrals, cleaning, training or careers.</li>
+              <li>To create and manage family, carer and work accounts.</li>
+              <li>To review applications, references and supporting documents.</li>
+              <li>To arrange care, manage bookings, assign carers and record booking progress.</li>
+              <li>To send account, application, mailbox and booking-status messages.</li>
+              <li>To protect the website, prevent misuse, diagnose errors and maintain records.</li>
+              <li>To meet legal, safeguarding, regulatory and record-keeping duties.</li>
+            </ul>
+            <p className="mt-4">
+              Our lawful reasons for using personal information may include taking steps before or
+              performing a contract, complying with a legal obligation, protecting vital interests,
+              and our legitimate interests in running a safe and effective care service. Where the
+              law requires consent, you can withdraw it by contacting us. We do not sell personal
+              information or use it for advertising.
             </p>
           </section>
 
           <section>
-            <h2 className="font-heading text-2xl font-extrabold text-primary">How long we keep it</h2>
+            <h2 className="font-heading text-2xl font-extrabold text-primary">Who may process it</h2>
             <p className="mt-3">
-              We keep account and care-request information while you have an account and for as long
-              as we need it to provide care or keep proper records. You can ask us to delete it.
+              We only share information where it is needed to provide the service, meet a legal duty
+              or protect someone. This may include authorised Gracefield staff and carers, professional
+              advisers, regulators, safeguarding bodies or emergency services when appropriate.
+            </p>
+            <p className="mt-3">
+              Trusted service providers also process limited information for us. These include our
+              website infrastructure, database and account provider, email-delivery provider and work
+              email provider. Supabase supports database storage and account sign-in, Resend delivers
+              service emails, and Zoho provides Gracefield work mailboxes. Google receives sign-in
+              information only if you choose “Continue with Google”. These providers may only use the
+              information needed to perform their service for us.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-heading text-2xl font-extrabold text-primary">International processing</h2>
+            <p className="mt-3">
+              Some service providers may process information outside the United Kingdom. Where this
+              happens, we require appropriate safeguards recognised by UK data-protection law, such as
+              an adequacy decision or approved contractual protections.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-heading text-2xl font-extrabold text-primary">Cookies and device storage</h2>
+            <p className="mt-3">
+              We use cookies and similar device storage to remember your cookie choice, keep you signed
+              in and make the website work. We do not use advertising cookies. Choosing “Only what's
+              needed” keeps only the storage required for essential features. You can clear cookies in
+              your browser, although this may sign you out.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-heading text-2xl font-extrabold text-primary">How long we keep information</h2>
+            <p className="mt-3">
+              We keep information only for as long as it is needed for the purpose it was collected,
+              to provide care, manage accounts and applications, resolve concerns, meet safeguarding
+              or legal duties, and keep appropriate business records. Retention periods vary by record.
+              When information is no longer needed, we delete it or make it anonymous. You may ask us
+              to delete your information, although we may need to keep some records where the law or a
+              safeguarding obligation requires it.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-heading text-2xl font-extrabold text-primary">Security</h2>
+            <p className="mt-3">
+              We use access controls, private document storage, secure connections and restricted admin
+              tools to protect personal information. Work accounts and mailboxes are removed when they
+              are no longer required. No system can be guaranteed completely secure, so please keep
+              passwords private and contact us promptly if you believe an account has been misused.
             </p>
           </section>
 
           <section>
             <h2 className="font-heading text-2xl font-extrabold text-primary">Your rights</h2>
             <p className="mt-3">
-              You can ask to see the information we hold about you, have it corrected, or have it
-              deleted (sometimes called the right to be forgotten). You can also ask us to stop using
-              it in certain ways. Email us and we will help. If you are not happy with how we handle
-              your information, you can contact the Information Commissioner’s Office at{" "}
+              Depending on the circumstances, you may ask us for a copy of your information, to correct
+              it, delete it, restrict or object to its use, or transfer information you gave us. You may
+              also withdraw consent where consent is the lawful basis. Contact us using the details
+              above. We may need to confirm your identity before acting on a request.
+            </p>
+            <p className="mt-3">
+              If you are unhappy with how we use your information, please contact us first so we can
+              help. You can also complain to the Information Commissioner’s Office at{" "}
               <a
                 className="font-bold text-primary underline decoration-brand-gold underline-offset-4"
                 href="https://ico.org.uk"
@@ -113,10 +203,10 @@ function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="font-heading text-2xl font-extrabold text-primary">Security</h2>
+            <h2 className="font-heading text-2xl font-extrabold text-primary">Changes to this policy</h2>
             <p className="mt-3">
-              This site is served over HTTPS. Passwords and private keys are not stored in the public
-              website code. Please keep your own password private.
+              We may update this policy when our services or legal duties change. The latest version
+              will always appear on this page with its updated date.
             </p>
           </section>
 
