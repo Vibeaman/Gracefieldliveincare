@@ -130,11 +130,9 @@ function PrivacyPage() {
             </p>
             <p className="mt-3">
               Trusted service providers also process limited information for us. These include our
-              website infrastructure, database and account provider, email-delivery provider and work
-              email provider. Supabase supports database storage and account sign-in, Resend delivers
-              service emails, and Zoho provides Gracefield work mailboxes. Google receives sign-in
-              information only if you choose “Continue with Google”. These providers may only use the
-              information needed to perform their service for us.
+              website infrastructure, database and account provider, email-delivery provider, work
+              email provider, and, if you choose to sign in with a third-party account, that sign-in
+              provider. They may only use the information needed to perform their service for us.
             </p>
           </section>
 
