@@ -39,13 +39,16 @@ function CarerHomePage() {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = async () => {
+    let redirected = false;
     try {
       const user = await waitForUser();
       if (!user) {
+        redirected = true;
         await navigate({ to: "/carer/login" });
         return;
       }
       if (!isCarerUser(user)) {
+        redirected = true;
         await navigate({ to: "/account" });
         return;
       }
@@ -100,7 +103,7 @@ function CarerHomePage() {
     } catch (caught) {
       setError(authErrorMessage(caught, "We could not load your work. Please try again."));
     } finally {
-      setLoading(false);
+      if (!redirected) setLoading(false);
     }
   };
 

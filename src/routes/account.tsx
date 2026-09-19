@@ -38,13 +38,16 @@ function AccountPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
+    let redirected = false;
     try {
       const user = await waitForUser();
       if (!user) {
+        redirected = true;
         await navigate({ to: "/sign-in" });
         return;
       }
       if (isCarerUser(user)) {
+        redirected = true;
         await navigate({ to: "/carer" });
         return;
       }
@@ -92,7 +95,7 @@ function AccountPage() {
     } catch (caught) {
       setError(authErrorMessage(caught, "We could not load your account. Please try again."));
     } finally {
-      setLoading(false);
+      if (!redirected) setLoading(false);
     }
   };
 
