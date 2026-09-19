@@ -39,77 +39,69 @@ function CarerHomePage() {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = async () => {
-    const user = await waitForUser();
-    if (!user) {
-      await navigate({ to: "/carer/login" });
-      return;
-    }
-    if (!isCarerUser(user)) {
-      await navigate({ to: "/account" });
-      return;
-    }
+    try {
+      const user = await waitForUser();
+      if (!user) {
+        await navigate({ to: "/carer/login" });
+        return;
+      }
+      if (!isCarerUser(user)) {
+        await navigate({ to: "/account" });
+        return;
+      }
 
-    const supabase = getSupabase();
-    setEmail(user.email ?? "");
+      const supabase = getSupabase();
+      setEmail(user.email ?? "");
 
-    const { data: carer, error: carerError } = await supabase
-      .from("carers")
-      .select("id, name, application_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (carerError) {
-      setError(carerError.message);
-      setLoading(false);
-      return;
-    }
-    if (!carer) {
-      setError("We could not find your carer profile. Please contact Gracefield.");
-      setLoading(false);
-      return;
-    }
-    setName(carer.name);
+      const { data: carer, error: carerError } = await supabase
+        .from("carers")
+        .select("id, name, application_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (carerError) throw carerError;
+      if (!carer) {
+        setError("We could not find your carer profile. Please contact Gracefield.");
+        return;
+      }
+      setName(carer.name);
 
-    const { data: bookingRows, error: bookingError } = await supabase
-      .from("bookings")
-      .select("id, care_type, location, start_date, hours, status, clients ( full_name )")
-      .eq("assigned_carer_id", carer.id)
-      .order("start_date", { ascending: true });
-    if (bookingError) {
-      setError(bookingError.message);
-      setLoading(false);
-      return;
-    }
-    setBookings(
-      (bookingRows ?? []).map((row) => {
-        const clientRel = Array.isArray(row.clients) ? row.clients[0] : row.clients;
-        return {
-          id: row.id,
-          care_type: row.care_type,
-          location: row.location,
-          start_date: row.start_date,
-          hours: row.hours,
-          status: row.status,
-          client_name: clientRel?.full_name ?? "Family",
-        };
-      }),
-    );
+      const { data: bookingRows, error: bookingError } = await supabase
+        .from("bookings")
+        .select("id, care_type, location, start_date, hours, status, clients ( full_name )")
+        .eq("assigned_carer_id", carer.id)
+        .order("start_date", { ascending: true });
+      if (bookingError) throw bookingError;
+      setBookings(
+        (bookingRows ?? []).map((row) => {
+          const clientRel = Array.isArray(row.clients) ? row.clients[0] : row.clients;
+          return {
+            id: row.id,
+            care_type: row.care_type,
+            location: row.location,
+            start_date: row.start_date,
+            hours: row.hours,
+            status: row.status,
+            client_name: clientRel?.full_name?.trim() || "Family",
+          };
+        }),
+      );
 
-    let documentQuery = supabase
-      .from("application_documents")
-      .select("id, application_id, carer_id, doc_type, file_name, storage_path, content_type, status, created_at")
-      .order("created_at", { ascending: true });
-    documentQuery = carer.application_id
-      ? documentQuery.or(`carer_id.eq.${carer.id},application_id.eq.${carer.application_id}`)
-      : documentQuery.eq("carer_id", carer.id);
-    const { data: documentRows, error: documentError } = await documentQuery;
-    if (documentError) {
-      setError(documentError.message);
+      let documentQuery = supabase
+        .from("application_documents")
+        .select("id, application_id, carer_id, doc_type, file_name, storage_path, content_type, status, created_at")
+        .order("created_at", { ascending: true });
+      documentQuery = carer.application_id
+        ? documentQuery.or(`carer_id.eq.${carer.id},application_id.eq.${carer.application_id}`)
+        : documentQuery.eq("carer_id", carer.id);
+      const { data: documentRows, error: documentError } = await documentQuery;
+      if (documentError) throw documentError;
+      setDocuments((documentRows ?? []) as ApplicationDocument[]);
+      setError(null);
+    } catch (caught) {
+      setError(authErrorMessage(caught, "We could not load your work. Please try again."));
+    } finally {
       setLoading(false);
-      return;
     }
-    setDocuments((documentRows ?? []) as ApplicationDocument[]);
-    setError(null);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -203,7 +195,10 @@ function CarerHomePage() {
                           {formatDate(booking.start_date)} · {booking.care_type}
                         </p>
                       </div>
-                      <StatusLabel status={booking.status} label={BOOKING_STATUS_LABELS[booking.status]} />
+                      <StatusLabel
+                        status={booking.status}
+                        label={BOOKING_STATUS_LABELS[booking.status] ?? booking.status}
+                      />
                     </div>
                     <div className="mt-4">
                       <DetailRow label="Where" value={booking.location} />

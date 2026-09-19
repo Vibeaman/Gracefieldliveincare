@@ -38,64 +38,62 @@ function AccountPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
-    const user = await waitForUser();
-    if (!user) {
-      await navigate({ to: "/sign-in" });
-      return;
-    }
-    if (isCarerUser(user)) {
-      await navigate({ to: "/carer" });
-      return;
-    }
-    await ensureClientProfile();
-    const supabase = getSupabase();
-    setEmail(user.email ?? "");
+    try {
+      const user = await waitForUser();
+      if (!user) {
+        await navigate({ to: "/sign-in" });
+        return;
+      }
+      if (isCarerUser(user)) {
+        await navigate({ to: "/carer" });
+        return;
+      }
+      await ensureClientProfile();
+      const supabase = getSupabase();
+      setEmail(user.email ?? "");
 
-    const { data: clientRow, error: clientError } = await supabase
-      .from("clients")
-      .select("id, full_name, phone, address, created_at")
-      .eq("id", user.id)
-      .maybeSingle();
-    if (clientError) {
-      setError(clientError.message);
+      const { data: clientRow, error: clientError } = await supabase
+        .from("clients")
+        .select("id, full_name, phone, address, created_at")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (clientError) throw clientError;
+      setClient(clientRow);
+
+      const { data: bookingRows, error: bookingError } = await supabase
+        .from("bookings")
+        .select(
+          "id, client_id, care_type, location, start_date, hours, status, assigned_carer_id, created_at, carers ( id, name, photo_url, bio ), reviews ( id, rating, comment )",
+        )
+        .eq("client_id", user.id)
+        .order("created_at", { ascending: false });
+      if (bookingError) throw bookingError;
+
+      setBookings(
+        (bookingRows ?? []).map((row) => {
+          const carerRel = Array.isArray(row.carers) ? row.carers[0] : row.carers;
+          const reviewRel = Array.isArray(row.reviews) ? row.reviews[0] : row.reviews;
+          return {
+            id: row.id,
+            client_id: row.client_id,
+            care_type: row.care_type,
+            location: row.location,
+            start_date: row.start_date,
+            hours: row.hours,
+            status: row.status,
+            assigned_carer_id: row.assigned_carer_id,
+            created_at: row.created_at,
+            carer: carerRel ?? null,
+            review: reviewRel ?? null,
+          };
+        }),
+      );
+      setError(null);
+    } catch (caught) {
+      setError(authErrorMessage(caught, "We could not load your account. Please try again."));
+    } finally {
       setLoading(false);
-      return;
     }
-    setClient(clientRow);
-
-    const { data: bookingRows, error: bookingError } = await supabase
-      .from("bookings")
-      .select(
-        "id, client_id, care_type, location, start_date, hours, status, assigned_carer_id, created_at, carers ( id, name, photo_url, bio ), reviews ( id, rating, comment )",
-      )
-      .eq("client_id", user.id)
-      .order("created_at", { ascending: false });
-    if (bookingError) {
-      setError(bookingError.message);
-      setLoading(false);
-      return;
-    }
-
-    setBookings(
-      (bookingRows ?? []).map((row) => {
-        const carerRel = Array.isArray(row.carers) ? row.carers[0] : row.carers;
-        const reviewRel = Array.isArray(row.reviews) ? row.reviews[0] : row.reviews;
-        return {
-          id: row.id,
-          client_id: row.client_id,
-          care_type: row.care_type,
-          location: row.location,
-          start_date: row.start_date,
-          hours: row.hours,
-          status: row.status,
-          assigned_carer_id: row.assigned_carer_id,
-          created_at: row.created_at,
-          carer: carerRel ?? null,
-          review: reviewRel ?? null,
-        };
-      }),
-    );
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -104,6 +102,14 @@ function AccountPage() {
 
   if (loading) {
     return <div className="min-h-[40vh] bg-background" />;
+  }
+
+  if (error && !client) {
+    return (
+      <PageIntro eyebrow="Your account" title="We could not load your account.">
+        <p>{error}</p>
+      </PageIntro>
+    );
   }
 
   if (!isProfileComplete(client)) {
@@ -147,7 +153,7 @@ function AccountPage() {
                     </p>
                     <p className="mt-1 text-base text-muted-foreground">{booking.hours}</p>
                     <span className="mt-3 inline-flex rounded-full border border-primary/25 bg-secondary px-4 py-1.5 text-sm font-bold text-primary">
-                      {BOOKING_STATUS_LABELS[booking.status]}
+                      {BOOKING_STATUS_LABELS[booking.status] ?? booking.status}
                     </span>
                     {booking.status === "assigned" ? (
                       <p className="mt-3 text-base text-muted-foreground">
@@ -447,18 +453,23 @@ function LeaveReview({
     const comment = String(form.get("comment") ?? "");
     setBusy(true);
     setError(null);
-    const { error: insertError } = await getSupabase().from("reviews").insert({
-      booking_id: booking.id,
-      carer_id: carerId,
-      rating,
-      comment,
-    });
-    if (insertError) {
-      setError(authErrorMessage(insertError, "We could not save that review."));
+    try {
+      const { error: insertError } = await getSupabase().from("reviews").insert({
+        booking_id: booking.id,
+        carer_id: carerId,
+        rating,
+        comment,
+      });
+      if (insertError) {
+        setError(authErrorMessage(insertError, "We could not save that review."));
+        return;
+      }
+      onSaved();
+    } catch (caught) {
+      setError(authErrorMessage(caught, "We could not save that review."));
+    } finally {
       setBusy(false);
-      return;
     }
-    onSaved();
   };
 
   if (!open) {

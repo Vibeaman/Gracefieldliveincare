@@ -119,7 +119,7 @@ export function StatusLabel({ status, label }: { status: BookingStatus; label: s
     <span
       className={cn(
         "inline-flex items-center rounded-full border px-4 py-1.5 text-base font-bold",
-        STATUS_STYLES[status],
+        STATUS_STYLES[status] ?? "bg-muted text-muted-foreground border-border",
       )}
     >
       {label}

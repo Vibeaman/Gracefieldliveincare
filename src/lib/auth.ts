@@ -14,11 +14,25 @@ export async function getUser(): Promise<User | null> {
   return session?.user ?? null;
 }
 
+function urlLooksLikeAuthCallback(): boolean {
+  if (typeof window === "undefined") return false;
+  const hash = window.location.hash;
+  const search = window.location.search;
+  return (
+    hash.includes("access_token") ||
+    hash.includes("refresh_token") ||
+    hash.includes("error") ||
+    search.includes("code=") ||
+    search.includes("token=")
+  );
+}
+
 /** Wait for a session after Google or a password-reset link lands. */
 export async function waitForUser(timeoutMs = 4000): Promise<User | null> {
   const existing = await getUser();
   if (existing) return existing;
   if (!isSupabaseConfigured()) return null;
+  if (!urlLooksLikeAuthCallback()) return null;
 
   return new Promise((resolve) => {
     const supabase = getSupabase();
