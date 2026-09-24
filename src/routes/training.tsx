@@ -15,7 +15,14 @@ export const Route = createFileRoute("/training")({
   component: TrainingPage,
 });
 
-const cleaningServices = ["Medication", "Meal at home", "Company"];
+const cleaningServices = [
+  "Medication",
+  "Meal at home",
+  "Company",
+  "Carpets, including cleaning and removal",
+  "Vacuuming",
+  "Cobwebs",
+];
 
 function TrainingPage() {
   return (
