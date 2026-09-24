@@ -30,7 +30,7 @@ function TrainingPage() {
   return (
     <>
       <PageIntro
-        eyebrow="Training and cleaning"
+        eyebrow="Training"
         title="The skills behind good care, and extra help with the home."
         actions={
           <>
@@ -46,8 +46,7 @@ function TrainingPage() {
         }
       >
         <p>
-          Families come first at Gracefield. That is why every carer is trained to a high standard,
-          and why we can also arrange a thorough clean when a home needs extra help.
+          Families come first at Gracefield. That is why every carer is trained to a high standard.
         </p>
       </PageIntro>
 
