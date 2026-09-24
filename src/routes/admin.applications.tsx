@@ -204,7 +204,7 @@ function ApplicationDetail({
   return (
     <AdminScreen
       title={application.full_name}
-      instruction="Read their application and papers, then choose below. Accepting also creates their login."
+      instruction="Read their application and papers, then choose below. Accepting creates a website login. A work email is only made later, from Carers, when they are working with you."
       back={{ label: "Back to applications", onClick: onBack }}
     >
       <div className="grid gap-6">
@@ -296,13 +296,11 @@ function ApplicationDetail({
           <AdminCard className="grid gap-4">
             <SavedNote>
               {decision === "accepted"
-                ? `You accepted ${application.full_name}. Their login has been emailed to them.`
+                ? `You accepted ${application.full_name}. Their website login has been emailed to them. Create a work email later from Carers, only when they are working with you.`
                 : `You chose not right now for ${application.full_name}. Nothing has been sent to them.`}
             </SavedNote>
             {mailboxNote ? (
-              <p className="text-base text-muted-foreground">
-                Work email was not created automatically: {mailboxNote} You can try again from Carers, or make the mailbox by hand.
-              </p>
+              <p className="text-base text-muted-foreground">{mailboxNote}</p>
             ) : null}
             {error ? <p role="alert" className="text-lg font-bold text-destructive">{error}</p> : null}
           </AdminCard>

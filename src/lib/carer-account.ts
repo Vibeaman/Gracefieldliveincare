@@ -95,42 +95,9 @@ export async function provisionAcceptedCarer(application: {
     .update({ carer_id: carerId })
     .eq("application_id", application.id);
 
-  let workEmail: string | null = existingCarer?.work_email ?? null;
-  let mailboxStatus: MailboxStatus = (existingCarer?.mailbox_status as MailboxStatus) ?? "none";
+  const workEmail: string | null = existingCarer?.work_email ?? null;
+  const mailboxStatus: MailboxStatus = (existingCarer?.mailbox_status as MailboxStatus) ?? "none";
   let mailboxNote: string | null = null;
-
-  if (!(mailboxStatus === "created" && workEmail)) {
-    const { data: takenRows } = await supabase
-      .from("carers")
-      .select("work_email")
-      .not("work_email", "is", null);
-
-    const takenLocalParts = (takenRows ?? [])
-      .map((row) => String(row.work_email ?? "").split("@")[0] ?? "")
-      .filter(Boolean);
-
-    const mailbox = await createCarerMailbox({
-      fullName: application.full_name,
-      password,
-      takenLocalParts,
-    });
-
-    if (mailbox.status === "created") {
-      workEmail = mailbox.email;
-      mailboxStatus = "created";
-    } else if (mailbox.status === "skipped") {
-      mailboxStatus = "skipped";
-      mailboxNote = mailbox.reason;
-    } else {
-      mailboxStatus = "failed";
-      mailboxNote = mailbox.reason;
-    }
-
-    await supabase
-      .from("carers")
-      .update({ work_email: workEmail, mailbox_status: mailboxStatus })
-      .eq("id", carerId);
-  }
 
   const loginEmail = workEmail ?? application.email;
   let userId = existingCarer?.user_id as string | null | undefined;
@@ -161,12 +128,13 @@ export async function provisionAcceptedCarer(application: {
           "That email already has an account, but we could not attach it to this carer.",
         );
       }
-      await linkLoginToWorkEmail({
-        userId: match.id,
-        workEmail: loginEmail,
+      const { error: updateError } = await supabase.auth.admin.updateUserById(match.id, {
         password,
-        fullName: application.full_name,
+        email_confirm: true,
+        user_metadata: { full_name: application.full_name },
+        app_metadata: { role: "carer" },
       });
+      if (updateError) throw new Error(updateError.message);
       userId = match.id;
     } else {
       userId = created.user.id;
@@ -177,13 +145,6 @@ export async function provisionAcceptedCarer(application: {
       .update({ user_id: userId })
       .eq("id", carerId);
     if (linkError) throw new Error(linkError.message);
-  } else if (workEmail) {
-    await linkLoginToWorkEmail({
-      userId,
-      workEmail,
-      password,
-      fullName: application.full_name,
-    });
   }
 
   const firstName = application.full_name.split(" ")[0] || application.full_name;
@@ -197,27 +158,14 @@ export async function provisionAcceptedCarer(application: {
     "",
   ];
 
-  if (workEmail && mailboxStatus === "created") {
-    lines.push(
-      "Use your Gracefield work email to sign in to the website. The same details open your real work mailbox.",
-      "",
-      `Work email: ${workEmail}`,
-      `Password: ${password}`,
-      "",
-      "Keep these details safe. This password does not change, and it is the only way to sign in.",
-      "",
-      ...mailboxHowTo(workEmail, password),
-    );
-  } else {
-    lines.push(
-      `Email: ${loginEmail}`,
-      `Password: ${password}`,
-      "",
-      "Keep these details safe. This password does not change.",
-      "",
-      "Your work email is being set up. We will send it separately if it is not in this message.",
-    );
-  }
+  lines.push(
+    `Email: ${loginEmail}`,
+    `Password: ${password}`,
+    "",
+    "Keep these details safe. This password does not change.",
+    "",
+    "This is a website login only. A Gracefield work mailbox is set up later, only when you are working with a family.",
+  );
 
   lines.push("", "With thanks,", "Gracefield Living in Care");
 

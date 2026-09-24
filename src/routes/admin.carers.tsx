@@ -137,8 +137,8 @@ function AdminCarersPage() {
                     </p>
                     {carer.work_email ? (
                       <p className="mt-1 text-sm text-muted-foreground">{carer.work_email}</p>
-                    ) : carer.mailbox_status === "failed" || carer.mailbox_status === "skipped" ? (
-                      <p className="mt-1 text-sm text-muted-foreground">Work email not set up yet</p>
+                    ) : carer.user_id ? (
+                      <p className="mt-1 text-sm text-muted-foreground">Website login only. No work email yet.</p>
                     ) : null}
                   </div>
                 </div>
@@ -166,7 +166,7 @@ function AdminCarersPage() {
                         }
                       }}
                     >
-                      Try work email again
+                      Create work email
                     </Button>
                   ) : null}
                   <Button
