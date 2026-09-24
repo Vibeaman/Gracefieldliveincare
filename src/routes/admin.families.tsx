@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
-import { AdminCard, AdminScreen, ConfirmRemoveButton, DetailRow, TapRow } from "@/components/admin";
+import { Button } from "@/components/ui/button";
+import { AdminCard, AdminScreen, ConfirmRemoveButton, DetailRow, FieldLabel, TapRow, fieldClasses } from "@/components/admin";
 import { getAdminPasscode } from "@/lib/admin-session";
 import { deleteAdminClient, listAdminClients } from "@/lib/admin.functions";
 import { formatDate, type AdminClient } from "@/lib/database.types";
@@ -18,7 +19,10 @@ function AdminFamiliesPage() {
   const [clients, setClients] = useState<AdminClient[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [removeEmail, setRemoveEmail] = useState("");
+  const [removing, setRemoving] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -73,6 +77,7 @@ function AdminFamiliesPage() {
       back={{ label: "Back to home", to: "/admin" }}
     >
       {error ? <p role="alert" className="mb-6 text-lg font-bold text-destructive">{error}</p> : null}
+      {note ? <p className="mb-6 text-lg font-bold text-primary">{note}</p> : null}
       {loading ? (
         <p className="text-lg text-muted-foreground">Loading…</p>
       ) : clients.length === 0 ? (
@@ -98,6 +103,45 @@ function AdminFamiliesPage() {
           ))}
         </ul>
       )}
+      <form
+        className="mt-10 space-y-4"
+        onSubmit={async (event: FormEvent<HTMLFormElement>) => {
+          event.preventDefault();
+          const email = removeEmail.trim().toLowerCase();
+          if (!email) return;
+          setRemoving(true);
+          setError(null);
+          setNote(null);
+          try {
+            await deleteAdminClient({
+              data: { passcode: getAdminPasscode(), email },
+            });
+            setClients((current) =>
+              current.filter((client) => (client.email ?? "").trim().toLowerCase() !== email),
+            );
+            setRemoveEmail("");
+            setNote(`${email} has been removed. They can create a new account.`);
+          } catch (caught) {
+            setError(publicErrorMessage(caught, "Could not remove that account."));
+          } finally {
+            setRemoving(false);
+          }
+        }}
+      >
+        <FieldLabel htmlFor="remove-family-email">Remove an account by email</FieldLabel>
+        <input
+          id="remove-family-email"
+          type="email"
+          required
+          value={removeEmail}
+          onChange={(event) => setRemoveEmail(event.target.value)}
+          className={fieldClasses}
+          placeholder="name@email.com"
+        />
+        <Button type="submit" size="lg" className="h-16 w-full text-lg" disabled={removing}>
+          {removing ? "Removing…" : "Remove account"}
+        </Button>
+      </form>
     </AdminScreen>
   );
 }
