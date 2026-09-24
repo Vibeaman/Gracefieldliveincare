@@ -5,6 +5,7 @@ import { AdminCard, AdminScreen, DetailRow, TapRow } from "@/components/admin";
 import { getAdminPasscode } from "@/lib/admin-session";
 import { listAdminClients } from "@/lib/admin.functions";
 import { formatDate, type AdminClient } from "@/lib/database.types";
+import { publicErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/families")({
   head: () => ({
@@ -25,7 +26,7 @@ function AdminFamiliesPage() {
         const rows = await listAdminClients({ data: { passcode: getAdminPasscode() } });
         setClients(rows);
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "Could not load families.");
+        setError(publicErrorMessage(caught, "Could not load families."));
       } finally {
         setLoading(false);
       }

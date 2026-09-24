@@ -6,6 +6,7 @@ import { AdminCard, AdminScreen, StatusLabel } from "@/components/admin";
 import { getAdminPasscode } from "@/lib/admin-session";
 import { searchAdminRecords } from "@/lib/admin.functions";
 import { BOOKING_STATUS_LABELS, formatDate, type BookingStatus } from "@/lib/database.types";
+import { publicErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/search")({
   head: () => ({
@@ -32,7 +33,7 @@ function AdminSearchPage() {
       const rows = await searchAdminRecords({ data: { passcode: getAdminPasscode(), query: value } });
       setResult(rows);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not search.");
+      setError(publicErrorMessage(caught, "Could not search."));
     } finally {
       setBusy(false);
     }

@@ -27,6 +27,7 @@ import {
   experienceLabel,
 } from "@/lib/carer-docs";
 import { APPLICATION_STATUS_LABELS, formatDate, type Application, type DocumentStatus } from "@/lib/database.types";
+import { publicErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/applications")({
   head: () => ({
@@ -51,7 +52,7 @@ function AdminApplicationsPage() {
       setApplications(rows);
       setError(null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not load applications.");
+      setError(publicErrorMessage(caught, "Could not load applications."));
     } finally {
       setLoading(false);
     }
@@ -170,7 +171,7 @@ function ApplicationDetail({
       }
       await onChanged();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not save that choice.");
+      setError(publicErrorMessage(caught, "Could not save that choice."));
     } finally {
       setBusy(false);
     }
@@ -183,7 +184,7 @@ function ApplicationDetail({
       });
       window.open(signed.url, "_blank", "noopener,noreferrer");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not open that document.");
+      setError(publicErrorMessage(caught, "Could not open that document."));
     }
   };
 
@@ -196,7 +197,7 @@ function ApplicationDetail({
         current.map((document) => (document.id === documentId ? { ...document, status } : document)),
       );
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not update that document.");
+      setError(publicErrorMessage(caught, "Could not update that document."));
     }
   };
 

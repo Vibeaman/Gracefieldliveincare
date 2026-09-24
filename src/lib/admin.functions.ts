@@ -4,7 +4,7 @@ import { z } from "zod";
 import { provisionAcceptedCarer, retryCarerMailbox } from "@/lib/carer-account";
 import { deleteCarerMailbox } from "@/lib/zoho-mail";
 import { sendBookingStatusEmail } from "@/lib/booking-emails";
-import { getServiceSupabase, requireAdminPasscode } from "@/lib/supabase.server";
+import { getServiceSupabase, publicServerError, requireAdminPasscode } from "@/lib/supabase.server";
 import type {
   AdminBooking,
   AdminClient,
@@ -38,7 +38,7 @@ export const listAdminBookings = createServerFn({ method: "POST" })
         "id, client_id, care_type, location, start_date, hours, status, assigned_carer_id, created_at, clients ( id, full_name, phone ), carers ( id, name )",
       )
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return (rows ?? []).map((row) => {
       const clientRel = Array.isArray(row.clients) ? row.clients[0] : row.clients;
       const carerRel = Array.isArray(row.carers) ? row.carers[0] : row.carers;
@@ -75,7 +75,7 @@ export const updateAdminBooking = createServerFn({ method: "POST" })
       .select("id, client_id, status")
       .eq("id", data.id)
       .single();
-    if (loadError) throw new Error(loadError.message);
+    if (loadError) throw publicServerError(loadError, "Could not load that.");
 
     const { error } = await supabase
       .from("bookings")
@@ -84,7 +84,7 @@ export const updateAdminBooking = createServerFn({ method: "POST" })
         assigned_carer_id: data.assigned_carer_id,
       })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
 
     const previousStatus = current.status as BookingStatus;
     if (previousStatus !== data.status) {
@@ -108,7 +108,7 @@ export const deleteAdminBooking = createServerFn({ method: "POST" })
     requireAdminPasscode(data.passcode);
     const supabase = getServiceSupabase();
     const { error } = await supabase.from("bookings").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return { ok: true as const };
   });
 
@@ -121,7 +121,7 @@ export const listAdminCarers = createServerFn({ method: "POST" })
       .from("carers")
       .select("id, user_id, application_id, name, bio, photo_url, specialty, work_email, mailbox_status, created_at")
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return (rows ?? []).map((row) => ({
       id: row.id,
       user_id: row.user_id ?? null,
@@ -158,11 +158,11 @@ export const saveAdminCarer = createServerFn({ method: "POST" })
     };
     if (data.id) {
       const { error } = await supabase.from("carers").update(payload).eq("id", data.id);
-      if (error) throw new Error(error.message);
+      if (error) throw publicServerError(error, "Could not load that.");
       return { id: data.id };
     }
     const { data: row, error } = await supabase.from("carers").insert(payload).select("id").single();
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return { id: row.id as string };
   });
 
@@ -176,7 +176,7 @@ export const deleteAdminCarer = createServerFn({ method: "POST" })
       .select("id, user_id, work_email")
       .eq("id", data.id)
       .single();
-    if (loadError) throw new Error(loadError.message);
+    if (loadError) throw publicServerError(loadError, "Could not load that.");
 
     let mailboxNote: string | null = null;
     if (carer.work_email) {
@@ -208,7 +208,7 @@ export const deleteAdminCarer = createServerFn({ method: "POST" })
     }
 
     const { error } = await supabase.from("carers").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return { ok: true as const, mailboxNote };
   });
 
@@ -221,7 +221,7 @@ export const listAdminEnquiries = createServerFn({ method: "POST" })
       .from("enquiries")
       .select("id, full_name, email, phone, subject, message, created_at")
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return rows ?? [];
   });
 
@@ -231,7 +231,7 @@ export const deleteAdminEnquiry = createServerFn({ method: "POST" })
     requireAdminPasscode(data.passcode);
     const supabase = getServiceSupabase();
     const { error } = await supabase.from("enquiries").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return { ok: true as const };
   });
 
@@ -246,7 +246,7 @@ export const listAdminApplications = createServerFn({ method: "POST" })
         "id, full_name, email, phone, years_experience, availability, about, photo_url, status, created_at, application_documents ( id, application_id, carer_id, doc_type, file_name, storage_path, content_type, status, created_at )",
       )
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return (rows ?? []).map((row) => {
       const documents = Array.isArray(row.application_documents)
         ? row.application_documents
@@ -285,14 +285,14 @@ export const decideAdminApplication = createServerFn({ method: "POST" })
       .select("id, full_name, email, about, photo_url, years_experience, status")
       .eq("id", data.id)
       .single();
-    if (loadError) throw new Error(loadError.message);
+    if (loadError) throw publicServerError(loadError, "Could not load that.");
 
     if (data.decision === "declined") {
       const { error: updateError } = await supabase
         .from("applications")
         .update({ status: "declined" })
         .eq("id", data.id);
-      if (updateError) throw new Error(updateError.message);
+      if (updateError) throw publicServerError(updateError, "Could not save that.");
       return { ok: true as const, mailboxStatus: "none" as const, mailboxNote: null };
     }
 
@@ -306,7 +306,7 @@ export const decideAdminApplication = createServerFn({ method: "POST" })
       .from("applications")
       .update({ status: "accepted" })
       .eq("id", data.id);
-    if (updateError) throw new Error(updateError.message);
+    if (updateError) throw publicServerError(updateError, "Could not save that.");
 
     return {
       ok: true as const,
@@ -321,7 +321,7 @@ export const deleteAdminApplication = createServerFn({ method: "POST" })
     requireAdminPasscode(data.passcode);
     const supabase = getServiceSupabase();
     const { error } = await supabase.from("applications").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return { ok: true as const };
   });
 
@@ -344,7 +344,7 @@ export const uploadAdminPhoto = createServerFn({ method: "POST" })
       contentType: data.contentType,
       upsert: false,
     });
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     const { data: publicUrl } = supabase.storage.from("photos").getPublicUrl(path);
     return { photo_url: publicUrl.publicUrl };
   });
@@ -359,11 +359,11 @@ export const signAdminDocument = createServerFn({ method: "POST" })
       .select("storage_path, file_name")
       .eq("id", data.documentId)
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     const { data: signed, error: signedError } = await supabase.storage
       .from("carer-documents")
       .createSignedUrl(document.storage_path, 120);
-    if (signedError) throw new Error(signedError.message);
+    if (signedError) throw publicServerError(signedError, "Could not open that document.");
     return { url: signed.signedUrl, fileName: document.file_name };
   });
 
@@ -382,7 +382,7 @@ export const updateAdminDocumentStatus = createServerFn({ method: "POST" })
       .from("application_documents")
       .update({ status: data.status })
       .eq("id", data.documentId);
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
     return { ok: true as const };
   });
 
@@ -402,12 +402,12 @@ export const listAdminClients = createServerFn({ method: "POST" })
       .from("clients")
       .select("id, full_name, phone, created_at")
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw publicServerError(error, "Could not load that.");
 
     const { data: bookingRows, error: bookingError } = await supabase
       .from("bookings")
       .select("client_id");
-    if (bookingError) throw new Error(bookingError.message);
+    if (bookingError) throw publicServerError(bookingError, "Could not search.");
     const booked = new Set((bookingRows ?? []).map((row) => row.client_id));
 
     const clients: AdminClient[] = [];
@@ -447,8 +447,8 @@ export const searchAdminRecords = createServerFn({ method: "POST" })
           .or(`care_type.ilike.${needle},location.ilike.${needle}`)
           .limit(20),
       ]);
-    if (carerError) throw new Error(carerError.message);
-    if (bookingError) throw new Error(bookingError.message);
+    if (carerError) throw publicServerError(carerError, "Could not search.");
+    if (bookingError) throw publicServerError(bookingError, "Could not search.");
 
     const { data: namedClients } = await supabase
       .from("clients")
@@ -463,7 +463,7 @@ export const searchAdminRecords = createServerFn({ method: "POST" })
         .select("id, care_type, location, start_date, status, clients ( full_name )")
         .in("client_id", clientIds)
         .limit(20);
-      if (byClientError) throw new Error(byClientError.message);
+      if (byClientError) throw publicServerError(byClientError, "Could not search.");
       extraBookings = byClient ?? [];
     }
 

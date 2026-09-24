@@ -31,6 +31,7 @@ import {
   uploadAdminPhoto,
 } from "@/lib/admin.functions";
 import type { Carer } from "@/lib/database.types";
+import { publicErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/carers")({
   head: () => ({
@@ -57,7 +58,7 @@ function AdminCarersPage() {
       setCarers(rows);
       setError(null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not load carers.");
+      setError(publicErrorMessage(caught, "Could not load carers."));
     } finally {
       setLoading(false);
     }
@@ -161,7 +162,7 @@ function AdminCarersPage() {
                           }
                           await load();
                         } catch (caught) {
-                          setError(caught instanceof Error ? caught.message : "Could not create that work email.");
+                          setError(publicErrorMessage(caught, "Could not create that work email."));
                         }
                       }}
                     >
@@ -337,7 +338,7 @@ function CarerForm({
       setSaved(true);
       await onSaved();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not save.");
+      setError(publicErrorMessage(caught, "Could not save."));
       setBusy(false);
     }
   };

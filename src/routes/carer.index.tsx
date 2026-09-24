@@ -15,7 +15,7 @@ import {
   type ApplicationDocument,
   type CarerBooking,
 } from "@/lib/database.types";
-import { authErrorMessage, getSupabase } from "@/lib/supabase";
+import { authErrorMessage, publicErrorMessage, getSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/carer/")({
   head: () => ({
@@ -136,7 +136,7 @@ function CarerHomePage() {
       const signed = await signCarerDocument({ data: { userId: user.id, documentId } });
       window.open(signed.url, "_blank", "noopener,noreferrer");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not open that document.");
+      setError(publicErrorMessage(caught, "Could not open that document."));
     } finally {
       setBusyId(null);
     }

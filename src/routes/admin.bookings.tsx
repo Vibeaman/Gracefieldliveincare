@@ -28,6 +28,7 @@ import {
   type BookingStatus,
   type Carer,
 } from "@/lib/database.types";
+import { publicErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/bookings")({
   head: () => ({
@@ -57,7 +58,7 @@ function AdminBookingsPage() {
       setCarers(carerRows);
       setError(null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not load bookings.");
+      setError(publicErrorMessage(caught, "Could not load bookings."));
     } finally {
       setLoading(false);
     }
@@ -168,7 +169,7 @@ function BookingDetail({
       setSaved(true);
       await onSaved();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not save.");
+      setError(publicErrorMessage(caught, "Could not save."));
     } finally {
       setBusy(false);
     }

@@ -6,6 +6,7 @@ import { AdminCard, AdminScreen, ConfirmRemoveButton, DetailRow, TapRow } from "
 import { getAdminPasscode } from "@/lib/admin-session";
 import { deleteAdminEnquiry, listAdminEnquiries } from "@/lib/admin.functions";
 import { ENQUIRY_SUBJECT_LABELS, formatDate, type Enquiry } from "@/lib/database.types";
+import { publicErrorMessage } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/enquiries")({
   head: () => ({
@@ -29,7 +30,7 @@ function AdminEnquiriesPage() {
       setEnquiries(rows);
       setError(null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not load enquiries.");
+      setError(publicErrorMessage(caught, "Could not load enquiries."));
     } finally {
       setLoading(false);
     }
