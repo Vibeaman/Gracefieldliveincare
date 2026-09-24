@@ -15,16 +15,7 @@ export const Route = createFileRoute("/training")({
   component: TrainingPage,
 });
 
-const cleaningServices = [
-  "Carpets, including cleaning and removal",
-  "Kitchens and bathrooms",
-  "Windows, floors, surfaces and walls",
-  "Vacuuming",
-  "Upholstery",
-  "Cobwebs",
-  "Decluttering",
-  "Skirting boards and doors",
-];
+const cleaningServices = ["Medication", "Meal at home", "Company"];
 
 function TrainingPage() {
   return (
