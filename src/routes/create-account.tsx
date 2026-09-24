@@ -92,7 +92,9 @@ function CreateAccountPage() {
                   shortened address.
                 </p>
                 <Button asChild size="lg" className="mt-7 w-full">
-                  <Link to="/sign-in">Go to sign in</Link>
+                  <Link to="/sign-in" search={{ confirm: "1" }}>
+                    Go to sign in
+                  </Link>
                 </Button>
               </div>
             ) : (

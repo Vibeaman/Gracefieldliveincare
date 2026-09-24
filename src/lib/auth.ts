@@ -73,6 +73,16 @@ export async function signInWithEmail(email: string, password: string) {
   return getSupabase().auth.signInWithPassword({ email, password });
 }
 
+export async function resendConfirmationEmail(email: string) {
+  return getSupabase().auth.resend({
+    type: "signup",
+    email,
+    options: {
+      emailRedirectTo: `${window.location.origin}/account`,
+    },
+  });
+}
+
 export async function signInWithGoogle() {
   return getSupabase().auth.signInWithOAuth({
     provider: "google",

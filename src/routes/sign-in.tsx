@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,16 @@ import { Label } from "@/components/ui/label";
 import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
 import { HoneypotFields } from "@/components/honeypot-fields";
 import { PageIntro } from "@/components/gracefield";
-import { ensureClientProfile, isCarerUser, signInWithEmail } from "@/lib/auth";
+import { ensureClientProfile, isCarerUser, resendConfirmationEmail, signInWithEmail } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
 import { isLikelySpam } from "@/lib/spam-guard";
 import { authErrorMessage, getSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/sign-in")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    confirm: search["confirm"] === "1" || search["confirm"] === true ? "1" : undefined,
+  }),
   head: () => ({
     meta: pageMeta(PAGE_SEO.signIn.title, PAGE_SEO.signIn.description, { path: "/sign-in" }),
   }),
@@ -22,8 +25,16 @@ export const Route = createFileRoute("/sign-in")({
 
 function SignInPage() {
   const navigate = useNavigate();
+  const { confirm } = Route.useSearch();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(
+    confirm === "1"
+      ? "If you just created an account, tap the confirmation link in your email first, then sign in here."
+      : null,
+  );
+  const [lastEmail, setLastEmail] = useState("");
+  const [resending, setResending] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -36,6 +47,8 @@ function SignInPage() {
     const password = String(form.get("signin-password") ?? "");
     setBusy(true);
     setError(null);
+    setNote(null);
+    setLastEmail(email);
     try {
       const { error: authError } = await signInWithEmail(email, password);
       if (authError) {
@@ -92,8 +105,30 @@ function SignInPage() {
                 </div>
                 <Input id="signin-password" name="signin-password" type="password" required autoComplete="current-password" className="mt-2 h-13 rounded-xl bg-background px-4 text-base" />
               </div>
+              {note ? (
+                <p className="text-base text-muted-foreground">{note}</p>
+              ) : null}
               {error ? (
                 <p role="alert" className="text-base font-bold text-destructive">{error}</p>
+              ) : null}
+              {error && lastEmail ? (
+                <button
+                  type="button"
+                  className="text-sm font-bold text-primary underline decoration-brand-gold underline-offset-4"
+                  disabled={resending}
+                  onClick={async () => {
+                    setResending(true);
+                    const { error: resendError } = await resendConfirmationEmail(lastEmail);
+                    setResending(false);
+                    setNote(
+                      resendError
+                        ? authErrorMessage(resendError, "We could not send that email. Please try again.")
+                        : "If that email still needs confirming, a new link is on its way. Check spam too.",
+                    );
+                  }}
+                >
+                  {resending ? "Sending…" : "Send the confirmation email again"}
+                </button>
               ) : null}
               <Button type="submit" size="lg" className="w-full" disabled={busy}>
                 {busy ? "Signing in…" : "Sign in"}
