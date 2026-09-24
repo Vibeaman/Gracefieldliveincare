@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/gracefield";
 import { FieldLabel, fieldClasses } from "@/components/admin";
 import { getAdminPasscode, isAdminUnlocked, lockAdmin, unlockAdmin } from "@/lib/admin-session";
-import { listAdminBookings } from "@/lib/admin.functions";
+import { verifyAdminPasscode } from "@/lib/admin.functions";
 
 /**
  * TEMPORARY GATE. NOT REAL SECURITY.
@@ -93,18 +93,19 @@ function AdminHeader({ onLock }: { onLock: () => void }) {
 
 function PasscodeScreen({ onUnlock }: { onUnlock: (passcode: string) => void }) {
   const [value, setValue] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setBusy(true);
-    setError(false);
+    setError(null);
     try {
-      await listAdminBookings({ data: { passcode: value.trim() } });
+      await verifyAdminPasscode({ data: { passcode: value.trim() } });
       onUnlock(value.trim());
-    } catch {
-      setError(true);
+    } catch (cause: unknown) {
+      const message = cause instanceof Error ? cause.message : String(cause);
+      setError(message || "That password did not work. Please try again.");
       setBusy(false);
     }
   };
@@ -135,7 +136,7 @@ function PasscodeScreen({ onUnlock }: { onUnlock: (passcode: string) => void }) 
           />
           {error ? (
             <p role="alert" className="mt-3 text-lg font-bold text-destructive">
-              That password did not work. Please try again.
+              {error}
             </p>
           ) : null}
           <Button type="submit" size="lg" className="mt-6 h-16 w-full text-lg" disabled={busy}>

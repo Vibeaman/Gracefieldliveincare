@@ -19,6 +19,14 @@ const passcodeSchema = z.object({
   passcode: z.string().min(1),
 });
 
+/** Unlock check only — does not touch Supabase. */
+export const verifyAdminPasscode = createServerFn({ method: "POST" })
+  .validator(passcodeSchema)
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    requireAdminPasscode(data.passcode);
+    return { ok: true };
+  });
+
 export const listAdminBookings = createServerFn({ method: "POST" })
   .validator(passcodeSchema)
   .handler(async ({ data }): Promise<AdminBooking[]> => {
