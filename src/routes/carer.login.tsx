@@ -38,22 +38,27 @@ function CarerLoginPage() {
     const password = String(form.get("carer-password") ?? "");
     setBusy(true);
     setError(null);
-    const { error: authError } = await signInWithEmail(email, password);
-    if (authError) {
-      setError(authErrorMessage(authError, "That email or password did not work. Please try again."));
+    try {
+      const { error: authError } = await signInWithEmail(email, password);
+      if (authError) {
+        setError(authErrorMessage(authError, "That email or password did not work. Please try again."));
+        setBusy(false);
+        return;
+      }
+      const {
+        data: { user },
+      } = await getSupabase().auth.getUser();
+      if (!isCarerUser(user)) {
+        await getSupabase().auth.signOut();
+        setError("This page is for carers. Families sign in from the main Sign in page.");
+        setBusy(false);
+        return;
+      }
+      await navigate({ to: "/carer" });
+    } catch (cause: unknown) {
+      setError(authErrorMessage(cause, "That email or password did not work. Please try again."));
       setBusy(false);
-      return;
     }
-    const {
-      data: { user },
-    } = await getSupabase().auth.getUser();
-    if (!isCarerUser(user)) {
-      await getSupabase().auth.signOut();
-      setError("This page is for carers. Families sign in from the main Sign in page.");
-      setBusy(false);
-      return;
-    }
-    await navigate({ to: "/carer" });
   };
 
   return (

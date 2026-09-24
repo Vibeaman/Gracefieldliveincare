@@ -122,15 +122,20 @@ export async function ensureClientProfile(fullName?: string) {
 
   if (existing) {
     if (fullName && !existing.full_name) {
-      await supabase.from("clients").update({ full_name: fullName }).eq("id", user.id);
+      const { error } = await supabase
+        .from("clients")
+        .update({ full_name: fullName })
+        .eq("id", user.id);
+      if (error) throw error;
     }
     return;
   }
 
-  await supabase.from("clients").insert({
+  const { error } = await supabase.from("clients").insert({
     id: user.id,
     full_name: fullName || nameFromUser(user),
   });
+  if (error) throw error;
 }
 
 export async function getClientProfile(): Promise<Client | null> {

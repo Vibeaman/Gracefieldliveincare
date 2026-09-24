@@ -37,13 +37,18 @@ function ForgotPasswordPage() {
     const email = String(form.get("reset-email") ?? "");
     setBusy(true);
     setError(null);
-    const { error: resetError } = await requestPasswordReset(email);
-    if (resetError) {
-      setError(authErrorMessage(resetError, "We could not send that email. Please try again."));
+    try {
+      const { error: resetError } = await requestPasswordReset(email);
+      if (resetError) {
+        setError(authErrorMessage(resetError, "We could not send that email. Please try again."));
+        setBusy(false);
+        return;
+      }
+      setSent(true);
+    } catch (cause: unknown) {
+      setError(authErrorMessage(cause, "We could not send that email. Please try again."));
       setBusy(false);
-      return;
     }
-    setSent(true);
   };
 
   return (

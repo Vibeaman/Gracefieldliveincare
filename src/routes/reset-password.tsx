@@ -82,16 +82,21 @@ function ResetPasswordPage() {
     }
     setBusy(true);
     setError(null);
-    const { error: updateError } = await updatePassword(password);
-    if (updateError) {
-      setError(authErrorMessage(updateError, "We could not save that password. Please try again."));
+    try {
+      const { error: updateError } = await updatePassword(password);
+      if (updateError) {
+        setError(authErrorMessage(updateError, "We could not save that password. Please try again."));
+        setBusy(false);
+        return;
+      }
+      const {
+        data: { user },
+      } = await getSupabase().auth.getUser();
+      await navigate({ to: isCarerUser(user) ? "/carer" : "/account" });
+    } catch (cause: unknown) {
+      setError(authErrorMessage(cause, "We could not save that password. Please try again."));
       setBusy(false);
-      return;
     }
-    const {
-      data: { user },
-    } = await getSupabase().auth.getUser();
-    await navigate({ to: isCarerUser(user) ? "/carer" : "/account" });
   };
 
   return (

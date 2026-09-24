@@ -29,10 +29,14 @@ function RequestCarePage() {
 
   useEffect(() => {
     void (async () => {
-      const user = await getUser();
-      setSignedIn(Boolean(user));
-      if (user) {
-        setClient(await getClientProfile());
+      try {
+        const user = await getUser();
+        setSignedIn(Boolean(user));
+        if (user) {
+          setClient(await getClientProfile());
+        }
+      } catch {
+        setSignedIn(false);
       }
     })();
   }, []);
