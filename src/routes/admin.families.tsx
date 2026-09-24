@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { AdminCard, AdminScreen, DetailRow, TapRow } from "@/components/admin";
+import { AdminCard, AdminScreen, ConfirmRemoveButton, DetailRow, TapRow } from "@/components/admin";
 import { getAdminPasscode } from "@/lib/admin-session";
-import { listAdminClients } from "@/lib/admin.functions";
+import { deleteAdminClient, listAdminClients } from "@/lib/admin.functions";
 import { formatDate, type AdminClient } from "@/lib/database.types";
 import { publicErrorMessage } from "@/lib/supabase";
 
@@ -49,6 +49,19 @@ function AdminFamiliesPage() {
           <DetailRow label="Signed up" value={formatDate(open.created_at.slice(0, 10))} />
           <DetailRow label="Asked for care" value={open.has_booking ? "Yes" : "Not yet"} />
         </AdminCard>
+        <ConfirmRemoveButton
+          label="Remove this family account"
+          title="Remove this family account?"
+          description="They will need to create a new account to sign in again. This cannot be undone."
+          confirmLabel="Yes, remove it"
+          onConfirm={async () => {
+            await deleteAdminClient({
+              data: { passcode: getAdminPasscode(), id: open.id, email: open.email || undefined },
+            });
+            setClients((current) => current.filter((client) => client.id !== open.id));
+            setOpenId(null);
+          }}
+        />
       </AdminScreen>
     );
   }

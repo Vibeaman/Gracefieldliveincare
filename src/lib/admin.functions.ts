@@ -425,6 +425,41 @@ export const listAdminClients = createServerFn({ method: "POST" })
     return clients;
   });
 
+export const deleteAdminClient = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      passcode: z.string().min(1),
+      id: z.string().uuid().optional(),
+      email: z.string().email().optional(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    requireAdminPasscode(data.passcode);
+    const supabase = getServiceSupabase();
+    const targetEmail = data.email?.trim().toLowerCase();
+    let userId = data.id;
+
+    if (!userId && targetEmail) {
+      const { data: listed, error: listError } = await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: 1000,
+      });
+      if (listError) throw publicServerError(listError, "Could not find that account.");
+      const match = (listed.users ?? []).find(
+        (user) => (user.email ?? "").trim().toLowerCase() === targetEmail,
+      );
+      userId = match?.id;
+    }
+
+    if (!userId) {
+      throw new Error("No family account was found for that email.");
+    }
+
+    const { error } = await supabase.auth.admin.deleteUser(userId);
+    if (error) throw publicServerError(error, "Could not remove that account.");
+    return { ok: true as const };
+  });
+
 export const searchAdminRecords = createServerFn({ method: "POST" })
   .validator(z.object({ passcode: z.string().min(1), query: z.string().trim().min(1).max(80) }))
   .handler(async ({ data }) => {
