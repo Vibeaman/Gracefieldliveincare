@@ -440,15 +440,21 @@ export const deleteAdminClient = createServerFn({ method: "POST" })
     let userId = data.id;
 
     if (!userId && targetEmail) {
-      const { data: listed, error: listError } = await supabase.auth.admin.listUsers({
-        page: 1,
-        perPage: 1000,
-      });
-      if (listError) throw publicServerError(listError, "Could not find that account.");
-      const match = (listed.users ?? []).find(
-        (user) => (user.email ?? "").trim().toLowerCase() === targetEmail,
-      );
-      userId = match?.id;
+      let page = 1;
+      while (!userId && page <= 20) {
+        const { data: listed, error: listError } = await supabase.auth.admin.listUsers({
+          page,
+          perPage: 200,
+        });
+        if (listError) throw publicServerError(listError, "Could not find that account.");
+        const users = listed.users ?? [];
+        const match = users.find(
+          (user) => (user.email ?? "").trim().toLowerCase() === targetEmail,
+        );
+        userId = match?.id;
+        if (users.length < 200) break;
+        page += 1;
+      }
     }
 
     if (!userId) {
