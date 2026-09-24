@@ -42,9 +42,14 @@ export function GoogleContinueButton() {
         onClick={async () => {
           setBusy(true);
           setError(null);
-          const { error: authError } = await signInWithGoogle();
-          if (authError) {
-            setError(authErrorMessage(authError, "Google sign-in did not work. Please try again."));
+          try {
+            const { error: authError } = await signInWithGoogle();
+            if (authError) {
+              setError(authErrorMessage(authError, "Google sign-in did not work. Please try again."));
+              setBusy(false);
+            }
+          } catch (cause: unknown) {
+            setError(authErrorMessage(cause, "Google sign-in did not work. Please try again."));
             setBusy(false);
           }
         }}

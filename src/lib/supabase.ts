@@ -36,22 +36,29 @@ export function getSupabase(): SupabaseClient {
 export function authErrorMessage(error: unknown, fallback: string): string {
   if (error && typeof error === "object" && "message" in error) {
     const message = String((error as { message: unknown }).message);
-    if (message.toLowerCase().includes("email not confirmed")) {
+    const lower = message.toLowerCase();
+    if (
+      lower.includes("load failed") ||
+      lower.includes("failed to fetch") ||
+      lower.includes("networkerror") ||
+      lower.includes("network request failed") ||
+      lower.includes("fetch failed")
+    ) {
+      return "We could not reach the sign-in service. Check your connection and try again. If you just created an account, wait a moment, then sign in on gracefieldliveincare.com.";
+    }
+    if (lower.includes("email not confirmed")) {
       return "Check your email and tap the confirmation link, then try again.";
     }
-    if (message.toLowerCase().includes("invalid login")) {
+    if (lower.includes("invalid login")) {
       return "That email or password did not work. Please try again.";
     }
-    if (message.toLowerCase().includes("already registered")) {
+    if (lower.includes("already registered")) {
       return "That email already has an account. Sign in instead.";
     }
-    if (
-      message.toLowerCase().includes("provider is not enabled") ||
-      message.toLowerCase().includes("unsupported provider")
-    ) {
+    if (lower.includes("provider is not enabled") || lower.includes("unsupported provider")) {
       return "Google sign-in is not switched on yet. Please use email and password, or try again shortly.";
     }
-    if (message.toLowerCase().includes("redirect")) {
+    if (lower.includes("redirect")) {
       return "Google could not send you back to Gracefield. Please try again, or sign in with email.";
     }
     return message;

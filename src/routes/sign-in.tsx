@@ -36,21 +36,30 @@ function SignInPage() {
     const password = String(form.get("signin-password") ?? "");
     setBusy(true);
     setError(null);
-    const { error: authError } = await signInWithEmail(email, password);
-    if (authError) {
-      setError(authErrorMessage(authError, "That email or password did not work. Please try again."));
+    try {
+      const { error: authError } = await signInWithEmail(email, password);
+      if (authError) {
+        setError(authErrorMessage(authError, "That email or password did not work. Please try again."));
+        setBusy(false);
+        return;
+      }
+      const {
+        data: { user },
+      } = await getSupabase().auth.getUser();
+      if (isCarerUser(user)) {
+        await navigate({ to: "/carer" });
+        return;
+      }
+      try {
+        await ensureClientProfile();
+      } catch (profileError) {
+        console.error("ensureClientProfile", profileError);
+      }
+      await navigate({ to: "/account" });
+    } catch (cause: unknown) {
+      setError(authErrorMessage(cause, "That email or password did not work. Please try again."));
       setBusy(false);
-      return;
     }
-    const {
-      data: { user },
-    } = await getSupabase().auth.getUser();
-    if (isCarerUser(user)) {
-      await navigate({ to: "/carer" });
-      return;
-    }
-    await ensureClientProfile();
-    await navigate({ to: "/account" });
   };
 
   return (

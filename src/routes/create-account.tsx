@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { AuthOrDivider, GoogleContinueButton } from "@/components/google-continue";
 import { HoneypotFields } from "@/components/honeypot-fields";
 import { PageIntro } from "@/components/gracefield";
-import { ensureClientProfile, signUpWithEmail } from "@/lib/auth";
+import { ensureClientProfile, signInWithEmail, signUpWithEmail } from "@/lib/auth";
 import { pageMeta } from "@/lib/page-meta";
 import { PAGE_SEO } from "@/lib/seo";
 import { isLikelySpam } from "@/lib/spam-guard";
@@ -39,19 +39,38 @@ function CreateAccountPage() {
     const password = String(form.get("signup-password") ?? "");
     setBusy(true);
     setError(null);
-    const { data, error: authError } = await signUpWithEmail(email, password);
-    if (authError) {
-      setError(authErrorMessage(authError, "We could not create that account. Please try again."));
+    try {
+      const { data, error: authError } = await signUpWithEmail(email, password);
+      if (authError) {
+        setError(authErrorMessage(authError, "We could not create that account. Please try again."));
+        setBusy(false);
+        return;
+      }
+      if (!data.session) {
+        const signedIn = await signInWithEmail(email, password);
+        if (!signedIn.error && signedIn.data.session) {
+          try {
+            await ensureClientProfile();
+          } catch (profileError) {
+            console.error("ensureClientProfile", profileError);
+          }
+          await navigate({ to: "/account" });
+          return;
+        }
+        setNeedsConfirm(true);
+        setBusy(false);
+        return;
+      }
+      try {
+        await ensureClientProfile();
+      } catch (profileError) {
+        console.error("ensureClientProfile", profileError);
+      }
+      await navigate({ to: "/account" });
+    } catch (cause: unknown) {
+      setError(authErrorMessage(cause, "We could not create that account. Please try again."));
       setBusy(false);
-      return;
     }
-    if (!data.session) {
-      setNeedsConfirm(true);
-      setBusy(false);
-      return;
-    }
-    await ensureClientProfile();
-    await navigate({ to: "/account" });
   };
 
   return (
@@ -65,10 +84,12 @@ function CreateAccountPage() {
             {needsConfirm ? (
               <div role="status">
                 <h2 className="font-heading text-2xl font-extrabold text-primary sm:text-3xl">
-                  You can sign in now.
+                  Check your email, then sign in.
                 </h2>
                 <p className="mt-3 text-base text-muted-foreground">
-                  Your account is ready. Sign in with the email and password you just used.
+                  Your account was created. If you get a confirmation email, tap the link first.
+                  Then sign in with the same email and password. Use gracefieldliveincare.com, not a
+                  shortened address.
                 </p>
                 <Button asChild size="lg" className="mt-7 w-full">
                   <Link to="/sign-in">Go to sign in</Link>
