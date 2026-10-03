@@ -35,6 +35,7 @@ Admin screens: [http://localhost:3000/admin](http://localhost:3000/admin). Defau
    - `supabase/carer-accounts.sql` — carer logins, private documents, and extra admin views
    - `supabase/carer-rls-fix.sql` — if a signed-in carer sees “infinite recursion” on their work page
    - `supabase/reviews-policy.sql` — if leaving a review fails
+   - `supabase/team-applications.sql` — office applications, separate from carers
 4. Copy the project URL, anon key, and service role key from **Project Settings → API** into `.env.local` and into Vercel.
 
 ## Deploy to Vercel
@@ -66,11 +67,15 @@ Live paths:
 - Care request (after sign in): `/request-care`
 - Client account: `/account`
 - Carer sign in / work: `/carer/login`, `/carer`
+- Office applications: `/join-the-team`
 - Admin: `/admin` (not linked from the public nav)
+- Admin team: `/admin/team`
 - Admin enquiries: `/admin/enquiries`
 - Admin families / search: `/admin/families`, `/admin/search`
 
-Carers cannot create their own account. They apply on `/careers`. Accepting an application creates their login and emails the password. Work mailboxes (`firstname@gracefieldliveincare.com`) are created at the same time once Zoho is connected.
+Carers cannot create their own account. They apply on `/careers`. Accepting an application creates their website login and emails the password. A carer work mailbox is set up later from Carers, once Zoho is connected.
+
+Office staff apply on `/join-the-team`. That only saves the application. In admin, Team is where you accept or say not right now. Accept creates `firstname@gracefieldliveincare.com` in Zoho and emails the password and mailbox steps to their personal address. It does not create an admin login. If Zoho is not connected, the person is still recorded and you can try the mailbox again.
 
 The admin passcode is checked on the server for every admin write. It is still a keep-out sign for the page itself, not a full role system.
 
