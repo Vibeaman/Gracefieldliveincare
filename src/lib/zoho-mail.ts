@@ -193,8 +193,11 @@ async function requestMailboxDelete(
   const payload = (await response.json().catch(() => ({}))) as {
     status?: { description?: string; code?: number };
   };
+  const code = payload.status?.code;
+  const description = (payload.status?.description ?? "").toLowerCase();
+  const ok = response.ok && (code === undefined || code === 200) && !description.includes("fail");
   const reason = payload.status?.description || `Zoho said no (${response.status}).`;
-  return { ok: response.ok, reason };
+  return { ok, reason };
 }
 
 export async function deleteCarerMailbox(email: string): Promise<DeleteMailboxResult> {
