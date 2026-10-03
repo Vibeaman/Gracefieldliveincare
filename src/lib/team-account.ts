@@ -1,7 +1,7 @@
 import { randomPassword } from "@/lib/carer-account";
 import { sendResendEmail } from "@/lib/mail";
 import { getServiceSupabase } from "@/lib/supabase.server";
-import { createCarerMailbox } from "@/lib/zoho-mail";
+import { createCarerMailbox, deleteCarerMailbox } from "@/lib/zoho-mail";
 import type { MailboxStatus } from "@/lib/database.types";
 
 const COMPANY_LOCAL_PARTS = ["gracefield.liveincare", "gracefieldliveincare"];
@@ -106,7 +106,14 @@ export async function provisionAcceptedTeamMember(application: {
         mailbox_status: "created",
       })
       .eq("id", application.id);
-    if (error) throw new Error(error.message);
+    if (error) {
+      const removed = await deleteCarerMailbox(mailbox.email);
+      throw new Error(
+        removed.status === "deleted"
+          ? "The work mailbox was created, then removed, because the record could not be saved. Try again."
+          : `The work mailbox ${mailbox.email} was created, but the record could not be saved. Remove that mailbox in Zoho before trying again.`,
+      );
+    }
 
     const firstName = application.full_name.split(" ")[0] || application.full_name;
     const emailed = await sendResendEmail({

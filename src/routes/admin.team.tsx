@@ -174,11 +174,15 @@ function TeamDetail({ application, onBack, onChanged }: { application: TeamAppli
           description={`This takes ${application.full_name} off the team list. If they have a work mailbox, that is deleted too. You cannot undo this.`}
           confirmLabel="Yes, remove them"
           onConfirm={async () => {
-            await deleteAdminTeamApplication({
-              data: { passcode: getAdminPasscode(), id: application.id },
-            });
-            onBack();
-            await onChanged();
+            try {
+              await deleteAdminTeamApplication({
+                data: { passcode: getAdminPasscode(), id: application.id },
+              });
+              onBack();
+              await onChanged();
+            } catch (caught) {
+              setError(publicErrorMessage(caught, "Could not remove that person."));
+            }
           }}
         />
         <Button variant="outline" size="lg" className="h-16 w-full text-lg" onClick={onBack}>Back to team</Button>
