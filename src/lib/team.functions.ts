@@ -4,6 +4,7 @@ import { z } from "zod";
 import { contactToEmail, sendResendEmail } from "@/lib/mail";
 import { getServiceSupabase, publicServerError, requireAdminPasscode } from "@/lib/supabase.server";
 import { declineTeamApplication, provisionAcceptedTeamMember } from "@/lib/team-account";
+import { deleteCarerMailbox } from "@/lib/zoho-mail";
 import type { MailboxStatus, TeamApplication, TeamApplicationStatus } from "@/lib/database.types";
 
 const SITE_URL = (process.env["SITE_URL"] ?? "https://www.gracefieldliveincare.com").replace(
@@ -98,4 +99,30 @@ export const decideAdminTeamApplication = createServerFn({ method: "POST" })
       mailboxNote: provisioned.mailboxNote,
       workEmail: provisioned.workEmail,
     };
+  });
+
+export const deleteAdminTeamApplication = createServerFn({ method: "POST" })
+  .validator(z.object({ passcode: z.string().min(1), id: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    requireAdminPasscode(data.passcode);
+    const supabase = getServiceSupabase();
+    const { data: application, error: loadError } = await supabase
+      .from("team_applications")
+      .select("id, work_email")
+      .eq("id", data.id)
+      .single();
+    if (loadError) throw publicServerError(loadError, "Could not load that.");
+
+    if (application.work_email) {
+      const mailbox = await deleteCarerMailbox(application.work_email);
+      if (mailbox.status !== "deleted") {
+        throw new Error(
+          `Could not delete the work email, so this person was not removed. ${mailbox.reason}`,
+        );
+      }
+    }
+
+    const { error } = await supabase.from("team_applications").delete().eq("id", data.id);
+    if (error) throw publicServerError(error, "Could not remove that.");
+    return { ok: true as const };
   });

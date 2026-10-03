@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { AdminCard, AdminScreen, DetailRow, SavedNote, TapRow } from "@/components/admin";
+import { AdminCard, AdminScreen, ConfirmRemoveButton, DetailRow, SavedNote, TapRow } from "@/components/admin";
 import { getAdminPasscode } from "@/lib/admin-session";
 import {
   APPLICATION_STATUS_LABELS,
@@ -11,7 +11,7 @@ import {
   type TeamApplication,
 } from "@/lib/database.types";
 import { publicErrorMessage } from "@/lib/supabase";
-import { decideAdminTeamApplication, listAdminTeamApplications } from "@/lib/team.functions";
+import { decideAdminTeamApplication, deleteAdminTeamApplication, listAdminTeamApplications } from "@/lib/team.functions";
 
 export const Route = createFileRoute("/admin/team")({
   head: () => ({
@@ -168,6 +168,19 @@ function TeamDetail({ application, onBack, onChanged }: { application: TeamAppli
         {status === "declined" ? <SavedNote>You chose not right now. A short email was sent. No mailbox was created. They can apply again later.</SavedNote> : null}
         {mailboxStatus === "created" && workEmail ? <SavedNote>Accepted. Their work mailbox is {workEmail}. The steps were sent to their personal email.</SavedNote> : null}
         {error ? <p role="alert" className="text-lg font-bold text-destructive">{error}</p> : null}
+        <ConfirmRemoveButton
+          label="Remove this person"
+          title="Remove this person?"
+          description={`This takes ${application.full_name} off the team list. If they have a work mailbox, that is deleted too. You cannot undo this.`}
+          confirmLabel="Yes, remove them"
+          onConfirm={async () => {
+            await deleteAdminTeamApplication({
+              data: { passcode: getAdminPasscode(), id: application.id },
+            });
+            onBack();
+            await onChanged();
+          }}
+        />
         <Button variant="outline" size="lg" className="h-16 w-full text-lg" onClick={onBack}>Back to team</Button>
       </div>
     </AdminScreen>
