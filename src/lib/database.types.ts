@@ -1,5 +1,6 @@
 export type BookingStatus = "pending" | "assigned" | "active" | "completed";
 export type ApplicationStatus = "pending" | "accepted" | "declined";
+export type TeamApplicationStatus = ApplicationStatus;
 export type EnquirySubject = "care" | "referral" | "careers";
 export type DocumentType = "id" | "proof_of_address" | "reference" | "certificate" | "dbs";
 export type DocumentStatus = "uploaded" | "reviewed" | "verified";
@@ -89,6 +90,19 @@ export type Review = {
   carer_id: string;
   rating: number;
   comment: string;
+  created_at: string;
+};
+
+export type TeamApplication = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  job: string;
+  about: string;
+  status: TeamApplicationStatus;
+  work_email: string | null;
+  mailbox_status: MailboxStatus;
   created_at: string;
 };
 
