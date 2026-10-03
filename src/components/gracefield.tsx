@@ -12,7 +12,8 @@ const navItems = [
   { label: "What we do", to: "/what-we-do" as const },
   { label: "Live-in care", to: "/live-in-care" as const },
   { label: "Training", to: "/training" as const },
-  { label: "Careers", to: "/careers" as const },
+  { label: "Become a carer", to: "/careers" as const },
+  { label: "Join the office", to: "/join-the-team" as const },
 ];
 
 const desktopNavItems = navItems.filter((item) => item.to !== "/");
@@ -196,7 +197,8 @@ const footerMenu = [
   { label: "What we do", to: "/what-we-do" as const },
   { label: "Live-in care", to: "/live-in-care" as const },
   { label: "Training", to: "/training" as const },
-  { label: "Careers", to: "/careers" as const },
+  { label: "Become a carer", to: "/careers" as const },
+  { label: "Join the office", to: "/join-the-team" as const },
   { label: "Request care", to: "/request-care" as const },
   { label: "Contact us", to: "/contact" as const },
   { label: "Privacy policy", to: "/privacy" as const },

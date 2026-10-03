@@ -18,6 +18,7 @@ import { Route as CarerRouteImport } from './routes/carer'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CreateAccountRouteImport } from './routes/create-account'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as JoinTheTeamRouteImport } from './routes/join-the-team'
 import { Route as LiveInCareRouteImport } from './routes/live-in-care'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RequestCareRouteImport } from './routes/request-care'
@@ -33,6 +34,7 @@ import { Route as AdminCarersRouteImport } from './routes/admin.carers'
 import { Route as AdminEnquiriesRouteImport } from './routes/admin.enquiries'
 import { Route as AdminFamiliesRouteImport } from './routes/admin.families'
 import { Route as AdminSearchRouteImport } from './routes/admin.search'
+import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as CarerIndexRouteImport } from './routes/carer.index'
 import { Route as CarerLoginRouteImport } from './routes/carer.login'
 
@@ -79,6 +81,11 @@ const CreateAccountRoute = CreateAccountRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinTheTeamRoute = JoinTheTeamRouteImport.update({
+  id: '/join-the-team',
+  path: '/join-the-team',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LiveInCareRoute = LiveInCareRouteImport.update({
@@ -156,6 +163,11 @@ const AdminSearchRoute = AdminSearchRouteImport.update({
   path: '/search',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AdminRoute,
+} as any)
 const CarerIndexRoute = CarerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -177,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/create-account': typeof CreateAccountRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/join-the-team': typeof JoinTheTeamRoute
   '/live-in-care': typeof LiveInCareRoute
   '/privacy': typeof PrivacyRoute
   '/request-care': typeof RequestCareRoute
@@ -191,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/admin/enquiries': typeof AdminEnquiriesRoute
   '/admin/families': typeof AdminFamiliesRoute
   '/admin/search': typeof AdminSearchRoute
+  '/admin/team': typeof AdminTeamRoute
   '/carer/login': typeof CarerLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/carer/': typeof CarerIndexRoute
@@ -203,6 +217,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/create-account': typeof CreateAccountRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/join-the-team': typeof JoinTheTeamRoute
   '/live-in-care': typeof LiveInCareRoute
   '/privacy': typeof PrivacyRoute
   '/request-care': typeof RequestCareRoute
@@ -217,6 +232,7 @@ export interface FileRoutesByTo {
   '/admin/enquiries': typeof AdminEnquiriesRoute
   '/admin/families': typeof AdminFamiliesRoute
   '/admin/search': typeof AdminSearchRoute
+  '/admin/team': typeof AdminTeamRoute
   '/carer/login': typeof CarerLoginRoute
   '/admin': typeof AdminIndexRoute
   '/carer': typeof CarerIndexRoute
@@ -232,6 +248,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/create-account': typeof CreateAccountRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/join-the-team': typeof JoinTheTeamRoute
   '/live-in-care': typeof LiveInCareRoute
   '/privacy': typeof PrivacyRoute
   '/request-care': typeof RequestCareRoute
@@ -246,6 +263,7 @@ export interface FileRoutesById {
   '/admin/enquiries': typeof AdminEnquiriesRoute
   '/admin/families': typeof AdminFamiliesRoute
   '/admin/search': typeof AdminSearchRoute
+  '/admin/team': typeof AdminTeamRoute
   '/carer/login': typeof CarerLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/carer/': typeof CarerIndexRoute
@@ -262,6 +280,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/create-account'
     | '/forgot-password'
+    | '/join-the-team'
     | '/live-in-care'
     | '/privacy'
     | '/request-care'
@@ -276,6 +295,7 @@ export interface FileRouteTypes {
     | '/admin/enquiries'
     | '/admin/families'
     | '/admin/search'
+    | '/admin/team'
     | '/carer/login'
     | '/admin/'
     | '/carer/'
@@ -288,6 +308,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/create-account'
     | '/forgot-password'
+    | '/join-the-team'
     | '/live-in-care'
     | '/privacy'
     | '/request-care'
@@ -302,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin/enquiries'
     | '/admin/families'
     | '/admin/search'
+    | '/admin/team'
     | '/carer/login'
     | '/admin'
     | '/carer'
@@ -316,6 +338,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/create-account'
     | '/forgot-password'
+    | '/join-the-team'
     | '/live-in-care'
     | '/privacy'
     | '/request-care'
@@ -330,6 +353,7 @@ export interface FileRouteTypes {
     | '/admin/enquiries'
     | '/admin/families'
     | '/admin/search'
+    | '/admin/team'
     | '/carer/login'
     | '/admin/'
     | '/carer/'
@@ -345,6 +369,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   CreateAccountRoute: typeof CreateAccountRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  JoinTheTeamRoute: typeof JoinTheTeamRoute
   LiveInCareRoute: typeof LiveInCareRoute
   PrivacyRoute: typeof PrivacyRoute
   RequestCareRoute: typeof RequestCareRoute
@@ -418,6 +443,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join-the-team': {
+      id: '/join-the-team'
+      path: '/join-the-team'
+      fullPath: '/join-the-team'
+      preLoaderRoute: typeof JoinTheTeamRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/live-in-care': {
@@ -525,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSearchRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/carer/': {
       id: '/carer/'
       path: '/'
@@ -549,6 +588,7 @@ interface AdminRouteChildren {
   AdminEnquiriesRoute: typeof AdminEnquiriesRoute
   AdminFamiliesRoute: typeof AdminFamiliesRoute
   AdminSearchRoute: typeof AdminSearchRoute
+  AdminTeamRoute: typeof AdminTeamRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -559,6 +599,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEnquiriesRoute: AdminEnquiriesRoute,
   AdminFamiliesRoute: AdminFamiliesRoute,
   AdminSearchRoute: AdminSearchRoute,
+  AdminTeamRoute: AdminTeamRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -586,6 +627,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   CreateAccountRoute: CreateAccountRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  JoinTheTeamRoute: JoinTheTeamRoute,
   LiveInCareRoute: LiveInCareRoute,
   PrivacyRoute: PrivacyRoute,
   RequestCareRoute: RequestCareRoute,
