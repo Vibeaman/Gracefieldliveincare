@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarCheck, FileText, Home, Mail, Search, Users } from "lucide-react";
+import { Briefcase, CalendarCheck, FileText, Home, Mail, Search, Users } from "lucide-react";
 
 import { AdminScreen, BigActionCard } from "@/components/admin";
 
@@ -19,6 +19,12 @@ function AdminHomePage() {
           title="Applications"
           description="People waiting to work with you. Accepting creates their login."
           icon={FileText}
+        />
+        <BigActionCard
+          to="/admin/team"
+          title="Team"
+          description="People waiting to join the office. Accepting creates their work email."
+          icon={Briefcase}
         />
         <BigActionCard
           to="/admin/bookings"

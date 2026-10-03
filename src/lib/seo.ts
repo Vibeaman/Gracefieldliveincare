@@ -24,6 +24,11 @@ export const PAGE_SEO = {
     description:
       "How Gracefield live-in carers help with personal care, meals, medication, home life, company, appointments and nights.",
   },
+  joinTheTeam: {
+    title: "Join the Office | Gracefield Living in Care",
+    description:
+      "Apply to join the Gracefield office team. Tell us the job you want and a short note about yourself.",
+  },
   careers: {
     title: "Live-in Care Jobs | Gracefield Living in Care",
     description:
